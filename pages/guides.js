@@ -8,7 +8,7 @@ export default function Guides() {
   return (
     <div>
       <Link href="/">
-        <a>Home</a>
+        <a style={{ color: 'blue', cursor: 'pointer' }}>Home</a>
       </Link>
       <StoplightProject
         projectId="cHJqOjI4MDIz"
