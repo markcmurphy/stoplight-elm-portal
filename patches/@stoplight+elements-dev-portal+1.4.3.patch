@@ -1,0 +1,3691 @@
+diff --git a/node_modules/@stoplight/elements-dev-portal/index.esm.js b/node_modules/@stoplight/elements-dev-portal/index.esm.js
+index 14d5178..1216095 100644
+--- a/node_modules/@stoplight/elements-dev-portal/index.esm.js
++++ b/node_modules/@stoplight/elements-dev-portal/index.esm.js
+@@ -1,125 +1,351 @@
+-import { Menu, FieldButton, Provider, Modal, Input, Box, Icon, ListBox, ListBoxItem, Flex, VStack, Heading } from '@stoplight/mosaic';
++import {
++  Menu,
++  FieldButton,
++  Provider,
++  Modal,
++  Input,
++  Box,
++  Icon,
++  ListBox,
++  ListBoxItem,
++  Flex,
++  VStack,
++  Heading,
++} from '@stoplight/mosaic';
+ import * as React from 'react';
+ import React__default from 'react';
+-import { withQueryClientProvider, PersistenceContextProvider, MarkdownComponentsProvider, MockingProvider, Docs, withStyles, withPersistenceBoundary, withMosaicProvider, NodeTypeIconDefs, NodeTypeColors, TableOfContents as TableOfContents$1, PoweredByLink, useRouter, findFirstNode, SidebarLayout } from '@stoplight/elements-core';
++import {
++  withQueryClientProvider,
++  PersistenceContextProvider,
++  MarkdownComponentsProvider,
++  MockingProvider,
++  Docs,
++  withStyles,
++  withPersistenceBoundary,
++  withMosaicProvider,
++  NodeTypeIconDefs,
++  NodeTypeColors,
++  TableOfContents as TableOfContents$1,
++  PoweredByLink,
++  useRouter,
++  findFirstNode,
++  SidebarLayout,
++} from '@stoplight/elements-core';
+ import { resolve, dirname } from '@stoplight/path';
+ import { NodeType } from '@stoplight/types';
+ import { faSearch } from '@fortawesome/free-solid-svg-icons/faSearch';
+ import { pipe } from 'lodash/fp';
+ import { Route, useParams, useHistory, Redirect, Link } from 'react-router-dom';
+-import { faCircleNotch, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
++import {
++  faCircleNotch,
++  faExclamationTriangle,
++} from '@fortawesome/free-solid-svg-icons';
+ import { useQuery } from 'react-query';
+ import { useDebounce } from 'use-debounce';
+ 
+ const BranchSelector = ({ branchSlug, branches, onChange }) => {
+-    const currentBranch = branches.find(branch => (!branchSlug ? branch.is_default : branch.slug === branchSlug));
+-    const handleChange = React.useCallback((selectedSlug) => {
+-        const selectedBranch = branches.find(branch => branch.slug === selectedSlug);
+-        if (selectedBranch) {
+-            onChange(selectedBranch);
+-        }
+-    }, [onChange, branches]);
+-    return (React.createElement(Menu, { "aria-label": "Versions", placement: "bottom left", closeOnPress: true, matchTriggerWidth: true, renderTrigger: ({ isOpen }) => (React.createElement(FieldButton, { w: "full", icon: "layer-group", px: 4, h: "md", active: isOpen, borderR: 0, roundedR: "none" }, (currentBranch === null || currentBranch === void 0 ? void 0 : currentBranch.name) || (currentBranch === null || currentBranch === void 0 ? void 0 : currentBranch.slug) || 'Choose a version')), items: [
+-            {
+-                type: 'option_group',
+-                title: 'Versions',
+-                onChange: handleChange,
+-                value: (currentBranch === null || currentBranch === void 0 ? void 0 : currentBranch.slug) || '',
+-                children: branches.map(branch => ({
+-                    label: branch.name || branch.slug,
+-                    value: branch.slug,
+-                    meta: branch.is_default ? 'Default' : undefined,
+-                })),
+-            },
+-        ] }));
++  const currentBranch = branches.find((branch) =>
++    !branchSlug ? branch.is_default : branch.slug === branchSlug
++  );
++  const handleChange = React.useCallback(
++    (selectedSlug) => {
++      const selectedBranch = branches.find(
++        (branch) => branch.slug === selectedSlug
++      );
++      if (selectedBranch) {
++        onChange(selectedBranch);
++      }
++    },
++    [onChange, branches]
++  );
++  return React.createElement(Menu, {
++    'aria-label': 'Versions',
++    placement: 'bottom left',
++    closeOnPress: true,
++    matchTriggerWidth: true,
++    renderTrigger: ({ isOpen }) =>
++      React.createElement(
++        FieldButton,
++        {
++          w: 'full',
++          icon: 'layer-group',
++          px: 4,
++          h: 'md',
++          active: isOpen,
++          borderR: 0,
++          roundedR: 'none',
++        },
++        (currentBranch === null || currentBranch === void 0
++          ? void 0
++          : currentBranch.name) ||
++          (currentBranch === null || currentBranch === void 0
++            ? void 0
++            : currentBranch.slug) ||
++          'Choose a version'
++      ),
++    items: [
++      {
++        type: 'option_group',
++        title: 'Versions',
++        onChange: handleChange,
++        value:
++          (currentBranch === null || currentBranch === void 0
++            ? void 0
++            : currentBranch.slug) || '',
++        children: branches.map((branch) => ({
++          label: branch.name || branch.slug,
++          value: branch.slug,
++          meta: branch.is_default ? 'Default' : undefined,
++        })),
++      },
++    ],
++  });
+ };
+ 
+-const PlatformContext = React.createContext({ platformUrl: 'https://stoplight.io' });
+-const PlatformProvider = ({ platformUrl = 'https://stoplight.io', platformAuthToken, children, }) => {
+-    return (React.createElement(PlatformContext.Provider, { value: { platformUrl, platformAuthToken } },
+-        React.createElement(Provider, null, children)));
++const PlatformContext = React.createContext({
++  platformUrl: 'https://stoplight.io',
++});
++const PlatformProvider = ({
++  platformUrl = 'https://stoplight.io',
++  platformAuthToken,
++  children,
++}) => {
++  return React.createElement(
++    PlatformContext.Provider,
++    { value: { platformUrl, platformAuthToken } },
++    React.createElement(Provider, null, children)
++  );
+ };
++// console.log(PlatformProvider);
+ const DevPortalProvider = withQueryClientProvider(PlatformProvider);
+ 
+-const NodeContent = ({ node, Link, hideTryIt, hideTryItPanel, hideMocking, hideExport, tryItCredentialsPolicy, tryItCorsProxy, }) => {
+-    return (React.createElement(PersistenceContextProvider, null,
+-        React.createElement(NodeLinkContext.Provider, { value: [node, Link] },
+-            React.createElement(MarkdownComponentsProvider, { value: { a: LinkComponent } },
+-                React.createElement(MockingProvider, { mockUrl: node.links.mock_url, hideMocking: hideMocking },
+-                    React.createElement(Docs, { nodeType: node.type, nodeData: node.data, nodeTitle: node.title, layoutOptions: {
+-                            hideTryIt: hideTryIt,
+-                            hideTryItPanel: hideTryItPanel,
+-                            hideExport: hideExport || node.links.export_url === undefined,
+-                        }, useNodeForRefResolving: true, tryItCorsProxy: tryItCorsProxy, exportProps: [NodeType.HttpService, NodeType.Model].includes(node.type)
+-                            ? {
+-                                original: {
+-                                    href: node.links.export_url,
+-                                },
+-                                bundled: {
+-                                    href: getBundledUrl(node.links.export_url),
+-                                },
+-                            }
+-                            : undefined, tryItCredentialsPolicy: tryItCredentialsPolicy }))))));
++const NodeContent = ({
++  node,
++  Link,
++  hideTryIt,
++  hideTryItPanel,
++  hideMocking,
++  hideExport,
++  tryItCredentialsPolicy,
++  tryItCorsProxy,
++}) => {
++  // console.log(node);
++  return React.createElement(
++    PersistenceContextProvider,
++    null,
++    React.createElement(
++      NodeLinkContext.Provider,
++      { value: [node, Link] },
++      React.createElement(
++        MarkdownComponentsProvider,
++        { value: { a: LinkComponent } },
++        React.createElement(
++          MockingProvider,
++          { mockUrl: node.links.mock_url, hideMocking: hideMocking },
++          React.createElement(Docs, {
++            nodeType: node.type,
++            nodeData: node.data,
++            nodeTitle: node.title,
++            layoutOptions: {
++              hideTryIt: hideTryIt,
++              hideTryItPanel: hideTryItPanel,
++              hideExport: hideExport || node.links.export_url === undefined,
++            },
++            useNodeForRefResolving: true,
++            tryItCorsProxy: tryItCorsProxy,
++            exportProps: [NodeType.HttpService, NodeType.Model].includes(
++              node.type
++            )
++              ? {
++                  original: {
++                    href: node.links.export_url,
++                  },
++                  bundled: {
++                    href: getBundledUrl(node.links.export_url),
++                  },
++                }
++              : undefined,
++            tryItCredentialsPolicy: tryItCredentialsPolicy,
++          })
++        )
++      )
++    )
++  );
+ };
+ const NodeLinkContext = React.createContext(undefined);
+ const externalRegex = new RegExp('^(?:[a-z]+:)?//', 'i');
+ const LinkComponent = ({ children, href }) => {
+-    const ctx = React.useContext(NodeLinkContext);
+-    if (href && externalRegex.test(href)) {
+-        return (React.createElement("a", { href: href, target: "_blank", rel: "noreferrer" }, children));
++  const ctx = React.useContext(NodeLinkContext);
++  if (href && externalRegex.test(href)) {
++    return React.createElement(
++      'a',
++      { href: href, target: '_blank', rel: 'noreferrer' },
++      children
++    );
++  }
++  if (href && ctx) {
++    const [node, Link] = ctx;
++    const resolvedUri = resolve(dirname(node.uri), href);
++    const [resolvedUriWithoutAnchor, hash] = resolvedUri.split('#');
++    const decodedUrl = decodeURIComponent(href);
++    const decodedResolvedUriWithoutAnchor = decodeURIComponent(
++      resolvedUriWithoutAnchor
++    );
++    const edge = node.outbound_edges.find(
++      (edge) =>
++        edge.uri === decodedUrl || edge.uri === decodedResolvedUriWithoutAnchor
++    );
++    if (edge) {
++      return React.createElement(Link, { to: edge.slug, hash: hash }, children);
+     }
+-    if (href && ctx) {
+-        const [node, Link] = ctx;
+-        const resolvedUri = resolve(dirname(node.uri), href);
+-        const [resolvedUriWithoutAnchor, hash] = resolvedUri.split('#');
+-        const decodedUrl = decodeURIComponent(href);
+-        const decodedResolvedUriWithoutAnchor = decodeURIComponent(resolvedUriWithoutAnchor);
+-        const edge = node.outbound_edges.find(edge => edge.uri === decodedUrl || edge.uri === decodedResolvedUriWithoutAnchor);
+-        if (edge) {
+-            return (React.createElement(Link, { to: edge.slug, hash: hash }, children));
+-        }
+-    }
+-    return React.createElement("a", { href: href }, children);
++  }
++  return React.createElement('a', { href: href }, children);
+ };
+ function getBundledUrl(url) {
+-    if (url === undefined)
+-        return undefined;
+-    const bundledUrl = new URL(url);
+-    const searchParams = new URLSearchParams(bundledUrl.search);
+-    searchParams.append('deref', 'optimizedBundle');
+-    bundledUrl.search = searchParams.toString();
+-    return bundledUrl.toString();
++  if (url === undefined) return undefined;
++  const bundledUrl = new URL(url);
++  const searchParams = new URLSearchParams(bundledUrl.search);
++  searchParams.append('deref', 'optimizedBundle');
++  bundledUrl.search = searchParams.toString();
++  return bundledUrl.toString();
+ }
+ 
+-const SearchImpl = ({ search, searchResults, isOpen, onClose, onClick, onSearch }) => {
+-    const listBoxRef = React.useRef(null);
+-    const onChange = React.useCallback(e => onSearch(e.currentTarget.value), [onSearch]);
+-    const onKeyDown = React.useCallback(e => {
+-        var _a;
+-        if (e.key === 'ArrowDown') {
+-            e.preventDefault();
+-            (_a = listBoxRef.current) === null || _a === void 0 ? void 0 : _a.focus();
+-        }
+-    }, []);
+-    const onSelectionChange = React.useCallback(keys => {
+-        const selectedId = keys.values().next().value;
+-        const selectedResult = searchResults === null || searchResults === void 0 ? void 0 : searchResults.find(searchResult => `${searchResult.id}-${searchResult.project_id}` === selectedId);
+-        if (selectedResult) {
+-            onClick(selectedResult);
+-        }
+-    }, [searchResults, onClick]);
+-    return (React.createElement(Modal, { renderHeader: () => (React.createElement(Input, { appearance: "minimal", borderB: true, size: "lg", icon: React.createElement(Box, { as: Icon, ml: 1, icon: faSearch }), autoFocus: true, placeholder: "Search...", value: search, onChange: onChange, onKeyDown: onKeyDown })), isOpen: !!isOpen, onClose: onClose }, searchResults && searchResults.length > 0 ? (React.createElement(ListBox, { ref: listBoxRef, "aria-label": "Search", overflowY: "auto", h: 80, m: -5, items: searchResults, selectionMode: "single", onSelectionChange: onSelectionChange }, (searchResult) => {
+-        var _a, _b;
+-        return (React.createElement(ListBoxItem, { key: `${searchResult.id}-${searchResult.project_id}`, textValue: searchResult.title },
+-            React.createElement(Box, { p: 3, borderB: true },
+-                React.createElement(Flex, { align: "center" },
+-                    React.createElement(Box, { as: Icon, w: 4, icon: NodeTypeIconDefs[searchResult.type], style: { color: NodeTypeColors[searchResult.type] } }),
+-                    React.createElement(Box, { flex: 1, fontSize: "lg", dangerouslySetInnerHTML: { __html: (_a = searchResult.highlighted.name) !== null && _a !== void 0 ? _a : '' }, fontWeight: "medium", textOverflow: "overflow-ellipsis", mx: 2 }),
+-                    React.createElement(Box, { fontSize: "sm", color: "muted" }, searchResult.project_name)),
+-                React.createElement(Box, { dangerouslySetInnerHTML: { __html: (_b = searchResult.highlighted.summary) !== null && _b !== void 0 ? _b : '' }, color: "muted", fontSize: "sm", mt: 1, ml: 6 }))));
+-    })) : (React.createElement(Flex, { w: "full", h: 80, align: "center", justify: "center", m: -5 }, "No search results"))));
++const SearchImpl = ({
++  search,
++  searchResults,
++  isOpen,
++  onClose,
++  onClick,
++  onSearch,
++}) => {
++  const listBoxRef = React.useRef(null);
++  const onChange = React.useCallback((e) => onSearch(e.currentTarget.value), [
++    onSearch,
++  ]);
++  const onKeyDown = React.useCallback((e) => {
++    var _a;
++    if (e.key === 'ArrowDown') {
++      e.preventDefault();
++      (_a = listBoxRef.current) === null || _a === void 0 ? void 0 : _a.focus();
++    }
++  }, []);
++  const onSelectionChange = React.useCallback(
++    (keys) => {
++      const selectedId = keys.values().next().value;
++      const selectedResult =
++        searchResults === null || searchResults === void 0
++          ? void 0
++          : searchResults.find(
++              (searchResult) =>
++                `${searchResult.id}-${searchResult.project_id}` === selectedId
++            );
++      if (selectedResult) {
++        onClick(selectedResult);
++      }
++    },
++    [searchResults, onClick]
++  );
++  return React.createElement(
++    Modal,
++    {
++      renderHeader: () =>
++        React.createElement(Input, {
++          appearance: 'minimal',
++          borderB: true,
++          size: 'lg',
++          icon: React.createElement(Box, { as: Icon, ml: 1, icon: faSearch }),
++          autoFocus: true,
++          placeholder: 'Search...',
++          value: search,
++          onChange: onChange,
++          onKeyDown: onKeyDown,
++        }),
++      isOpen: !!isOpen,
++      onClose: onClose,
++    },
++    searchResults && searchResults.length > 0
++      ? React.createElement(
++          ListBox,
++          {
++            ref: listBoxRef,
++            'aria-label': 'Search',
++            overflowY: 'auto',
++            h: 80,
++            m: -5,
++            items: searchResults,
++            selectionMode: 'single',
++            onSelectionChange: onSelectionChange,
++          },
++          (searchResult) => {
++            var _a, _b;
++            return React.createElement(
++              ListBoxItem,
++              {
++                key: `${searchResult.id}-${searchResult.project_id}`,
++                textValue: searchResult.title,
++              },
++              React.createElement(
++                Box,
++                { p: 3, borderB: true },
++                React.createElement(
++                  Flex,
++                  { align: 'center' },
++                  React.createElement(Box, {
++                    as: Icon,
++                    w: 4,
++                    icon: NodeTypeIconDefs[searchResult.type],
++                    style: { color: NodeTypeColors[searchResult.type] },
++                  }),
++                  React.createElement(Box, {
++                    flex: 1,
++                    fontSize: 'lg',
++                    dangerouslySetInnerHTML: {
++                      __html:
++                        (_a = searchResult.highlighted.name) !== null &&
++                        _a !== void 0
++                          ? _a
++                          : '',
++                    },
++                    fontWeight: 'medium',
++                    textOverflow: 'overflow-ellipsis',
++                    mx: 2,
++                  }),
++                  React.createElement(
++                    Box,
++                    { fontSize: 'sm', color: 'muted' },
++                    searchResult.project_name
++                  )
++                ),
++                React.createElement(Box, {
++                  dangerouslySetInnerHTML: {
++                    __html:
++                      (_b = searchResult.highlighted.summary) !== null &&
++                      _b !== void 0
++                        ? _b
++                        : '',
++                  },
++                  color: 'muted',
++                  fontSize: 'sm',
++                  mt: 1,
++                  ml: 6,
++                })
++              )
++            );
++          }
++        )
++      : React.createElement(
++          Flex,
++          { w: 'full', h: 80, align: 'center', justify: 'center', m: -5 },
++          'No search results'
++        )
++  );
+ };
+-const Search = pipe(withStyles, withPersistenceBoundary, withMosaicProvider, withQueryClientProvider)(SearchImpl);
++const Search = pipe(
++  withStyles,
++  withPersistenceBoundary,
++  withMosaicProvider,
++  withQueryClientProvider
++)(SearchImpl);
+ 
+ /*! *****************************************************************************
+ Copyright (c) Microsoft Corporation.
+@@ -137,241 +363,610 @@ PERFORMANCE OF THIS SOFTWARE.
+ ***************************************************************************** */
+ 
+ function __rest(s, e) {
+-    var t = {};
+-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+-        t[p] = s[p];
+-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+-                t[p[i]] = s[p[i]];
+-        }
+-    return t;
++  var t = {};
++  for (var p in s)
++    if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
++      t[p] = s[p];
++  if (s != null && typeof Object.getOwnPropertySymbols === 'function')
++    for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
++      if (
++        e.indexOf(p[i]) < 0 &&
++        Object.prototype.propertyIsEnumerable.call(s, p[i])
++      )
++        t[p[i]] = s[p[i]];
++    }
++  return t;
+ }
+ 
+ function __awaiter(thisArg, _arguments, P, generator) {
+-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+-    return new (P || (P = Promise))(function (resolve, reject) {
+-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+-        step((generator = generator.apply(thisArg, _arguments || [])).next());
+-    });
++  function adopt(value) {
++    return value instanceof P
++      ? value
++      : new P(function (resolve) {
++          resolve(value);
++        });
++  }
++  return new (P || (P = Promise))(function (resolve, reject) {
++    function fulfilled(value) {
++      try {
++        step(generator.next(value));
++      } catch (e) {
++        reject(e);
++      }
++    }
++    function rejected(value) {
++      try {
++        step(generator['throw'](value));
++      } catch (e) {
++        reject(e);
++      }
++    }
++    function step(result) {
++      result.done
++        ? resolve(result.value)
++        : adopt(result.value).then(fulfilled, rejected);
++    }
++    step((generator = generator.apply(thisArg, _arguments || [])).next());
++  });
+ }
+ 
++const filterToc = (toc) => {
++  const filtered = toc.filter((x) => x.id !== 'ZG9jOjIyNjc4MTY1');
++  console.log(filtered);
++  return filtered;
++};
++
+ const TableOfContents = (_a) => {
+-    var { tableOfContents, activeId, Link, collapseTableOfContents = false, externalScrollbar, onLinkClick } = _a, boxProps = __rest(_a, ["tableOfContents", "activeId", "Link", "collapseTableOfContents", "externalScrollbar", "onLinkClick"]);
+-    return (React.createElement(Flex, Object.assign({ bg: "canvas-100" }, boxProps, { flexDirection: "col", maxH: "full" }),
+-        React.createElement(Flex, { flexGrow: true, flexShrink: true, overflowY: "auto" },
+-            React.createElement(TableOfContents$1, { tree: tableOfContents.items, activeId: activeId, Link: Link, maxDepthOpenByDefault: collapseTableOfContents ? 0 : 1, externalScrollbar: externalScrollbar, onLinkClick: onLinkClick })),
+-        tableOfContents.hide_powered_by ? null : (React.createElement(PoweredByLink, { source: activeId, pathname: typeof window !== 'undefined' ? window.location.pathname : '', packageType: "elements-dev-portal" }))));
++  console.log(_a);
++  var {
++      tableOfContents,
++      activeId,
++      Link,
++      collapseTableOfContents = false,
++      externalScrollbar,
++      onLinkClick,
++    } = _a,
++    boxProps = __rest(_a, [
++      'tableOfContents',
++      'activeId',
++      'Link',
++      'collapseTableOfContents',
++      'externalScrollbar',
++      'onLinkClick',
++    ]);
++  console.log(tableOfContents.items);
++  filterToc(tableOfContents.items);
++  return React.createElement(
++    Flex,
++    Object.assign({ bg: 'canvas-100' }, boxProps, {
++      flexDirection: 'col',
++      maxH: 'full',
++    }),
++    React.createElement(
++      Flex,
++      { flexGrow: true, flexShrink: true, overflowY: 'auto' },
++      React.createElement(TableOfContents$1, {
++        // tree: tableOfContents.items,
++        tree: filterToc(tableOfContents.items),
++        activeId: activeId,
++        Link: Link,
++        maxDepthOpenByDefault: collapseTableOfContents ? 0 : 1,
++        externalScrollbar: externalScrollbar,
++        onLinkClick: onLinkClick,
++      })
++    ),
++    tableOfContents.hide_powered_by
++      ? null
++      : React.createElement(PoweredByLink, {
++          source: activeId,
++          pathname:
++            typeof window !== 'undefined' ? window.location.pathname : '',
++          packageType: 'elements-dev-portal',
++        })
++  );
+ };
+ 
+-const Forbidden = () => (React__default.createElement(Flex, { align: "center", justify: "center", flexGrow: true },
+-    React__default.createElement(VStack, { spacing: 4, align: "center" },
+-        React__default.createElement(Heading, { size: 1 }, "Forbidden"),
+-        React__default.createElement(Box, { as: "p" }, "You don't have permission to access this resource"))));
++const Forbidden = () =>
++  React__default.createElement(
++    Flex,
++    { align: 'center', justify: 'center', flexGrow: true },
++    React__default.createElement(
++      VStack,
++      { spacing: 4, align: 'center' },
++      React__default.createElement(Heading, { size: 1 }, 'Forbidden'),
++      React__default.createElement(
++        Box,
++        { as: 'p' },
++        "You don't have permission to access this resource"
++      )
++    )
++  );
+ 
+-const Loading = () => (React__default.createElement(Flex, { justify: "center", alignItems: "center", w: "full", minH: "screen", color: "muted" },
+-    React__default.createElement(Icon, { icon: faCircleNotch, size: "3x", spin: true })));
++const Loading = () =>
++  React__default.createElement(
++    Flex,
++    {
++      justify: 'center',
++      alignItems: 'center',
++      w: 'full',
++      minH: 'screen',
++      color: 'muted',
++    },
++    React__default.createElement(Icon, {
++      icon: faCircleNotch,
++      size: '3x',
++      spin: true,
++    })
++  );
+ 
+-const NotFound = () => (React__default.createElement(Flex, { align: "center", justify: "center", flexGrow: true },
+-    React__default.createElement(VStack, { spacing: 4, align: "center" },
+-        React__default.createElement(Heading, { size: 1 }, "Not Found"),
+-        React__default.createElement(Box, { as: "p" }, "Could not find what you are looking for"))));
++const NotFound = () =>
++  React__default.createElement(
++    Flex,
++    { align: 'center', justify: 'center', flexGrow: true },
++    React__default.createElement(
++      VStack,
++      { spacing: 4, align: 'center' },
++      React__default.createElement(Heading, { size: 1 }, 'Not Found'),
++      React__default.createElement(
++        Box,
++        { as: 'p' },
++        'Could not find what you are looking for'
++      )
++    )
++  );
+ 
+-const UpgradeToStarter = () => (React__default.createElement(Flex, { as: "a", href: "https://stoplight.io/pricing/", target: "_blank", rel: "noreferrer noopener", justify: "center", alignItems: "center", w: "full", minH: "screen", color: "muted", flexDirection: "col" },
+-    React__default.createElement(Icon, { icon: faExclamationTriangle, size: "4x" }),
+-    React__default.createElement(Box, { pt: 3 }, "Please upgrade your Stoplight Workspace to the Starter Plan to use Elements Dev Portal in production.")));
++const UpgradeToStarter = () =>
++  React__default.createElement(
++    Flex,
++    {
++      as: 'a',
++      href: 'https://stoplight.io/pricing/',
++      target: '_blank',
++      rel: 'noreferrer noopener',
++      justify: 'center',
++      alignItems: 'center',
++      w: 'full',
++      minH: 'screen',
++      color: 'muted',
++      flexDirection: 'col',
++    },
++    React__default.createElement(Icon, {
++      icon: faExclamationTriangle,
++      size: '4x',
++    }),
++    React__default.createElement(
++      Box,
++      { pt: 3 },
++      'Please upgrade your Stoplight Workspace to the Starter Plan to use Elements Dev Portal in production.'
++    )
++  );
+ 
+-const appVersion = '1.4.3';
++const appVersion = '1.4.2';
+ 
+ class ResponseError extends Error {
+-    constructor(message, responseCode) {
+-        super(message);
+-        this.name = 'ResponseError';
+-        this.code = responseCode;
+-    }
++  constructor(message, responseCode) {
++    super(message);
++    this.name = 'ResponseError';
++    this.code = responseCode;
++  }
+ }
+-const getNodeContent = ({ nodeSlug, projectId, branchSlug, platformUrl = 'https://stoplight.io', platformAuthToken, }) => __awaiter(void 0, void 0, void 0, function* () {
++const getNodeContent = ({
++  nodeSlug,
++  projectId,
++  branchSlug,
++  platformUrl = 'https://stoplight.io',
++  platformAuthToken,
++}) =>
++  __awaiter(void 0, void 0, void 0, function* () {
+     const nodeId = getNodeIdFromSlug(nodeSlug);
+     const branchQuery = branchSlug ? `?branch=${branchSlug}` : '';
+-    const response = yield fetch(`${platformUrl}/api/v1/projects/${projectId}/nodes/${nodeId}${branchQuery}`, {
+-        headers: Object.assign({ 'Stoplight-Elements-Version': appVersion }, (platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` })),
+-    });
++    const response = yield fetch(
++      `${platformUrl}/api/v1/projects/${projectId}/nodes/${nodeId}${branchQuery}`,
++      {
++        headers: Object.assign(
++          { 'Stoplight-Elements-Version': appVersion },
++          platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` }
++        ),
++      }
++    );
+     const data = yield response.json();
+     if (!response.ok) {
+-        if (response.status === 402) {
+-            throw new ResponseError('Payment Required', response.status);
+-        }
+-        else if (response.status === 403) {
+-            throw new ResponseError('Forbidden', response.status);
+-        }
+-        else {
+-            throw new ResponseError('Something went wrong', response.status);
+-        }
++      if (response.status === 402) {
++        throw new ResponseError('Payment Required', response.status);
++      } else if (response.status === 403) {
++        throw new ResponseError('Forbidden', response.status);
++      } else {
++        throw new ResponseError('Something went wrong', response.status);
++      }
+     }
+     return data;
+-});
++  });
+ function getNodeIdFromSlug(nodeSlug) {
+-    return nodeSlug.split('-')[0];
++  return nodeSlug.split('-')[0];
+ }
+ 
+-const getBranches = ({ projectId, platformUrl = 'https://stoplight.io', platformAuthToken, }) => __awaiter(void 0, void 0, void 0, function* () {
+-    const response = yield fetch(`${platformUrl}/api/v1/projects/${projectId}/branches`, {
+-        headers: Object.assign({ 'Stoplight-Elements-Version': appVersion }, (platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` })),
+-    });
++const getBranches = ({
++  projectId,
++  platformUrl = 'https://stoplight.io',
++  platformAuthToken,
++}) =>
++  __awaiter(void 0, void 0, void 0, function* () {
++    const response = yield fetch(
++      `${platformUrl}/api/v1/projects/${projectId}/branches`,
++      {
++        headers: Object.assign(
++          { 'Stoplight-Elements-Version': appVersion },
++          platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` }
++        ),
++      }
++    );
+     const data = yield response.json();
+     if (!response.ok) {
+-        throw new Error(data);
++      throw new Error(data);
+     }
+     return data;
+-});
++  });
+ 
+ function useGetBranches({ projectId }) {
+-    const { platformUrl, platformAuthToken } = React.useContext(PlatformContext);
+-    return useQuery(['branches', projectId, platformUrl, platformAuthToken], () => getBranches({ projectId, platformUrl, platformAuthToken }), {
+-        enabled: projectId ? true : false,
+-    });
++  const { platformUrl, platformAuthToken } = React.useContext(PlatformContext);
++  return useQuery(
++    ['branches', projectId, platformUrl, platformAuthToken],
++    () => getBranches({ projectId, platformUrl, platformAuthToken }),
++    {
++      enabled: projectId ? true : false,
++    }
++  );
+ }
+ 
+-function useGetNodeContent({ nodeSlug, projectId, branchSlug, }) {
+-    const { platformUrl, platformAuthToken } = React.useContext(PlatformContext);
+-    return useQuery(['useNodeContent', nodeSlug, projectId, branchSlug, platformUrl, platformAuthToken], () => getNodeContent({ nodeSlug, projectId, branchSlug, platformUrl, platformAuthToken }), { enabled: nodeSlug && projectId ? true : false });
++function useGetNodeContent({ nodeSlug, projectId, branchSlug }) {
++  const { platformUrl, platformAuthToken } = React.useContext(PlatformContext);
++  return useQuery(
++    [
++      'useNodeContent',
++      nodeSlug,
++      projectId,
++      branchSlug,
++      platformUrl,
++      platformAuthToken,
++    ],
++    () =>
++      getNodeContent({
++        nodeSlug,
++        projectId,
++        branchSlug,
++        platformUrl,
++        platformAuthToken,
++      }),
++    { enabled: nodeSlug && projectId ? true : false }
++  );
+ }
+ 
+-const getTableOfContents = ({ projectId, branchSlug, platformUrl = 'https://stoplight.io', platformAuthToken, }) => __awaiter(void 0, void 0, void 0, function* () {
++const getTableOfContents = ({
++  projectId,
++  branchSlug,
++  platformUrl = 'https://stoplight.io',
++  platformAuthToken,
++}) =>
++  __awaiter(void 0, void 0, void 0, function* () {
+     const branchQuery = branchSlug ? `?branch=${branchSlug}` : '';
+-    const response = yield fetch(`${platformUrl}/api/v1/projects/${projectId}/table-of-contents${branchQuery}`, {
+-        headers: Object.assign({ 'Stoplight-Elements-Version': appVersion }, (platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` })),
+-    });
++    const response = yield fetch(
++      `${platformUrl}/api/v1/projects/${projectId}/table-of-contents${branchQuery}`,
++      {
++        headers: Object.assign(
++          { 'Stoplight-Elements-Version': appVersion },
++          platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` }
++        ),
++      }
++    );
+     const data = yield response.json();
++    console.log(window);
++    console.log(data);
+     if (!response.ok) {
+-        throw new Error(data);
++      throw new Error(data);
+     }
+     return data;
+-});
++  });
+ 
+ function useGetTableOfContents({ projectId, branchSlug }) {
+-    const { platformUrl, platformAuthToken } = React.useContext(PlatformContext);
+-    return useQuery(['tableOfContents', projectId, branchSlug, platformUrl, platformAuthToken], () => getTableOfContents({ projectId, branchSlug, platformUrl, platformAuthToken }), { enabled: projectId ? true : false });
+-}
+-
+-const StoplightProjectImpl = ({ projectId, hideTryIt, hideMocking, hideExport, collapseTableOfContents = false, tryItCredentialsPolicy, tryItCorsProxy, }) => {
+-    const { branchSlug = '', nodeSlug = '' } = useParams();
+-    const history = useHistory();
+-    const { data: tableOfContents, isFetched: isTocFetched } = useGetTableOfContents({ projectId, branchSlug });
+-    const { data: branches } = useGetBranches({ projectId });
+-    const { data: node, isLoading: isLoadingNode, isError, error: nodeError, } = useGetNodeContent({
+-        nodeSlug,
++  const { platformUrl, platformAuthToken } = React.useContext(PlatformContext);
++  return useQuery(
++    ['tableOfContents', projectId, branchSlug, platformUrl, platformAuthToken],
++    () =>
++      getTableOfContents({
+         projectId,
+         branchSlug,
+-    });
+-    const container = React.useRef(null);
+-    if (!nodeSlug && isTocFetched && (tableOfContents === null || tableOfContents === void 0 ? void 0 : tableOfContents.items)) {
+-        const firstNode = findFirstNode(tableOfContents.items);
+-        if (firstNode) {
+-            return React.createElement(Redirect, { to: branchSlug ? `/branches/${branchSlug}/${firstNode.slug}` : `/${firstNode.slug}` });
+-        }
+-    }
+-    let elem;
+-    if (isLoadingNode || !isTocFetched) {
+-        elem = React.createElement(Loading, null);
+-    }
+-    else if (isError) {
+-        if (nodeError instanceof ResponseError) {
+-            if (nodeError.code === 402) {
+-                elem = React.createElement(UpgradeToStarter, null);
+-            }
+-            else if (nodeError.code === 403) {
+-                elem = React.createElement(Forbidden, null);
+-            }
+-            else {
+-                elem = React.createElement(NotFound, null);
+-            }
+-        }
+-        else {
+-            elem = React.createElement(NotFound, null);
+-        }
++        platformUrl,
++        platformAuthToken,
++      }),
++    { enabled: projectId ? true : false }
++  );
++}
++
++const StoplightProjectImpl = ({
++  projectId,
++  hideTryIt,
++  hideMocking,
++  hideExport,
++  collapseTableOfContents = false,
++  tryItCredentialsPolicy,
++  tryItCorsProxy,
++}) => {
++  const { branchSlug = '', nodeSlug = '' } = useParams();
++  const history = useHistory();
++  const {
++    data: tableOfContents,
++    isFetched: isTocFetched,
++  } = useGetTableOfContents({ projectId, branchSlug });
++  const { data: branches } = useGetBranches({ projectId });
++  const {
++    data: node,
++    isLoading: isLoadingNode,
++    isError,
++    error: nodeError,
++  } = useGetNodeContent({
++    nodeSlug,
++    projectId,
++    branchSlug,
++  });
++  const container = React.useRef(null);
++  if (
++    !nodeSlug &&
++    isTocFetched &&
++    (tableOfContents === null || tableOfContents === void 0
++      ? void 0
++      : tableOfContents.items)
++  ) {
++    const firstNode = findFirstNode(tableOfContents.items);
++    if (firstNode) {
++      return React.createElement(Redirect, {
++        to: branchSlug
++          ? `/branches/${branchSlug}/${firstNode.slug}`
++          : `/${firstNode.slug}`,
++      });
+     }
+-    else if (!node) {
++  }
++  let elem;
++  if (isLoadingNode || !isTocFetched) {
++    elem = React.createElement(Loading, null);
++  } else if (isError) {
++    if (nodeError instanceof ResponseError) {
++      if (nodeError.code === 402) {
++        elem = React.createElement(UpgradeToStarter, null);
++      } else if (nodeError.code === 403) {
++        elem = React.createElement(Forbidden, null);
++      } else {
+         elem = React.createElement(NotFound, null);
++      }
++    } else {
++      elem = React.createElement(NotFound, null);
+     }
+-    else {
+-        elem = (React.createElement(NodeContent, { node: node, Link: Link, hideTryIt: hideTryIt, hideMocking: hideMocking, hideExport: hideExport, tryItCredentialsPolicy: tryItCredentialsPolicy, tryItCorsProxy: tryItCorsProxy }));
++  } else if (!node) {
++    elem = React.createElement(NotFound, null);
++  } else {
++    elem = React.createElement(NodeContent, {
++      node: node,
++      Link: Link,
++      hideTryIt: hideTryIt,
++      hideMocking: hideMocking,
++      hideExport: hideExport,
++      tryItCredentialsPolicy: tryItCredentialsPolicy,
++      tryItCorsProxy: tryItCorsProxy,
++    });
++  }
++  const handleTocClick = () => {
++    if (container.current) {
++      container.current.scrollIntoView();
+     }
+-    const handleTocClick = () => {
+-        if (container.current) {
+-            container.current.scrollIntoView();
+-        }
+-    };
+-    return (React.createElement(SidebarLayout, { ref: container, sidebar: React.createElement(React.Fragment, null,
+-            branches && branches.length > 1 ? (React.createElement(BranchSelector, { branchSlug: branchSlug, branches: branches, onChange: branch => history.push(branch.is_default ? `/${nodeSlug}` : `/branches/${branch.slug}/${nodeSlug}`) })) : null,
+-            tableOfContents ? (React.createElement(TableOfContents, { activeId: (node === null || node === void 0 ? void 0 : node.id) || (nodeSlug === null || nodeSlug === void 0 ? void 0 : nodeSlug.split('-')[0]) || '', tableOfContents: tableOfContents, Link: Link, collapseTableOfContents: collapseTableOfContents, onLinkClick: handleTocClick })) : null) }, elem));
++  };
++  return React.createElement(
++    SidebarLayout,
++    {
++      ref: container,
++      sidebar: React.createElement(
++        React.Fragment,
++        null,
++        branches && branches.length > 1
++          ? React.createElement(BranchSelector, {
++              branchSlug: branchSlug,
++              branches: branches,
++              onChange: (branch) =>
++                history.push(
++                  branch.is_default
++                    ? `/${nodeSlug}`
++                    : `/branches/${branch.slug}/${nodeSlug}`
++                ),
++            })
++          : null,
++        tableOfContents
++          ? React.createElement(TableOfContents, {
++              activeId:
++                (node === null || node === void 0 ? void 0 : node.id) ||
++                (nodeSlug === null || nodeSlug === void 0
++                  ? void 0
++                  : nodeSlug.split('-')[0]) ||
++                '',
++              tableOfContents: tableOfContents,
++              Link: Link,
++              collapseTableOfContents: collapseTableOfContents,
++              onLinkClick: handleTocClick,
++            })
++          : null
++      ),
++    },
++    elem
++  );
+ };
+ const StoplightProjectRouter = (_a) => {
+-    var { platformUrl, basePath = '/', router } = _a, props = __rest(_a, ["platformUrl", "basePath", "router"]);
+-    const { Router, routerProps } = useRouter(router !== null && router !== void 0 ? router : 'history', basePath);
+-    return (React.createElement(DevPortalProvider, { platformUrl: platformUrl },
+-        React.createElement(Router, Object.assign({}, routerProps, { key: basePath }),
+-            React.createElement(Route, { path: "/branches/:branchSlug/:nodeSlug", exact: true },
+-                React.createElement(StoplightProjectImpl, Object.assign({}, props))),
+-            React.createElement(Route, { path: "/:nodeSlug", exact: true },
+-                React.createElement(StoplightProjectImpl, Object.assign({}, props))),
+-            React.createElement(Route, { path: "/", exact: true },
+-                React.createElement(StoplightProjectImpl, Object.assign({}, props))))));
++  var { platformUrl, basePath = '/', router } = _a,
++    props = __rest(_a, ['platformUrl', 'basePath', 'router']);
++  const { Router, routerProps } = useRouter(
++    router !== null && router !== void 0 ? router : 'history',
++    basePath
++  );
++  return React.createElement(
++    DevPortalProvider,
++    { platformUrl: platformUrl },
++    React.createElement(
++      Router,
++      Object.assign({}, routerProps, { key: basePath }),
++      React.createElement(
++        Route,
++        { path: '/branches/:branchSlug/:nodeSlug', exact: true },
++        React.createElement(StoplightProjectImpl, Object.assign({}, props))
++      ),
++      React.createElement(
++        Route,
++        { path: '/:nodeSlug', exact: true },
++        React.createElement(StoplightProjectImpl, Object.assign({}, props))
++      ),
++      React.createElement(
++        Route,
++        { path: '/', exact: true },
++        React.createElement(StoplightProjectImpl, Object.assign({}, props))
++      )
++    )
++  );
+ };
+-const StoplightProject = pipe(withStyles, withPersistenceBoundary, withMosaicProvider, withQueryClientProvider)(StoplightProjectRouter);
++const StoplightProject = pipe(
++  withStyles,
++  withPersistenceBoundary,
++  withMosaicProvider,
++  withQueryClientProvider
++)(StoplightProjectRouter);
+ 
+-const getNodes = ({ workspaceId, branchSlug, projectIds, search, platformUrl = 'https://stoplight.io', platformAuthToken, }) => __awaiter(void 0, void 0, void 0, function* () {
++const getNodes = ({
++  workspaceId,
++  branchSlug,
++  projectIds,
++  search,
++  platformUrl = 'https://stoplight.io',
++  platformAuthToken,
++}) =>
++  __awaiter(void 0, void 0, void 0, function* () {
+     const queryParams = [];
+     let fetchedWorkspaceId = workspaceId || '';
+-    if (!workspaceId && (projectIds === null || projectIds === void 0 ? void 0 : projectIds.length)) {
+-        const response = yield fetch(`${platformUrl}/api/v1/projects/${projectIds[0]}`, {
+-            headers: Object.assign({ 'Stoplight-Elements-Version': appVersion }, (platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` })),
+-        });
+-        const data = yield response.json();
+-        fetchedWorkspaceId = data.workspace.id;
++    if (
++      !workspaceId &&
++      (projectIds === null || projectIds === void 0
++        ? void 0
++        : projectIds.length)
++    ) {
++      const response = yield fetch(
++        `${platformUrl}/api/v1/projects/${projectIds[0]}`,
++        {
++          headers: Object.assign(
++            { 'Stoplight-Elements-Version': appVersion },
++            platformAuthToken && {
++              Authorization: `Bearer ${platformAuthToken}`,
++            }
++          ),
++        }
++      );
++      const data = yield response.json();
++      fetchedWorkspaceId = data.workspace.id;
+     }
+     if (projectIds && projectIds.length) {
+-        queryParams.push(...projectIds.map((projectId, index) => `project_ids[${index}]=${projectId}`));
++      queryParams.push(
++        ...projectIds.map(
++          (projectId, index) => `project_ids[${index}]=${projectId}`
++        )
++      );
+     }
+     if (search) {
+-        queryParams.push(`search=${search}`);
++      queryParams.push(`search=${search}`);
+     }
+     if (branchSlug) {
+-        queryParams.push(`branchSlug=${branchSlug}`);
++      queryParams.push(`branchSlug=${branchSlug}`);
+     }
+     const query = queryParams.length ? `?${queryParams.join('&')}` : '';
+-    const response = yield fetch(`${platformUrl}/api/v1/workspaces/${fetchedWorkspaceId}/nodes${query}`, {
+-        headers: Object.assign({ 'Stoplight-Elements-Version': appVersion }, (platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` })),
+-    });
++    const response = yield fetch(
++      `${platformUrl}/api/v1/workspaces/${fetchedWorkspaceId}/nodes${query}`,
++      {
++        headers: Object.assign(
++          { 'Stoplight-Elements-Version': appVersion },
++          platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` }
++        ),
++      }
++    );
+     const data = yield response.json();
+     if (!response.ok) {
+-        throw new Error(data);
++      throw new Error(data);
+     }
+     return data;
+-});
++  });
+ 
+-const getWorkspace = ({ projectIds, platformUrl = 'https://stoplight.io', platformAuthToken, }) => __awaiter(void 0, void 0, void 0, function* () {
+-    const response = yield fetch(`${platformUrl}/api/v1/projects/${projectIds[0]}`, {
+-        headers: Object.assign({ 'Stoplight-Elements-Version': appVersion }, (platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` })),
+-    });
++const getWorkspace = ({
++  projectIds,
++  platformUrl = 'https://stoplight.io',
++  platformAuthToken,
++}) =>
++  __awaiter(void 0, void 0, void 0, function* () {
++    const response = yield fetch(
++      `${platformUrl}/api/v1/projects/${projectIds[0]}`,
++      {
++        headers: Object.assign(
++          { 'Stoplight-Elements-Version': appVersion },
++          platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` }
++        ),
++      }
++    );
+     const data = yield response.json();
+     if (!response.ok) {
+-        throw new Error(data);
++      throw new Error(data);
+     }
+     return data;
+-});
++  });
+ 
+-function useGetNodes({ search, workspaceId, branchSlug, projectIds, pause, }) {
+-    const { platformUrl, platformAuthToken } = React.useContext(PlatformContext);
+-    const [debounceSearch] = useDebounce(search, 500);
+-    return useQuery(['workspaceNodes', workspaceId, branchSlug, projectIds, debounceSearch, platformUrl, platformAuthToken], () => getNodes({ workspaceId, branchSlug, projectIds, search: debounceSearch, platformUrl, platformAuthToken }), { enabled: !pause });
++function useGetNodes({ search, workspaceId, branchSlug, projectIds, pause }) {
++  const { platformUrl, platformAuthToken } = React.useContext(PlatformContext);
++  const [debounceSearch] = useDebounce(search, 500);
++  return useQuery(
++    [
++      'workspaceNodes',
++      workspaceId,
++      branchSlug,
++      projectIds,
++      debounceSearch,
++      platformUrl,
++      platformAuthToken,
++    ],
++    () =>
++      getNodes({
++        workspaceId,
++        branchSlug,
++        projectIds,
++        search: debounceSearch,
++        platformUrl,
++        platformAuthToken,
++      }),
++    { enabled: !pause }
++  );
+ }
+ 
+ function useGetWorkspace({ projectIds }) {
+-    const { platformUrl, platformAuthToken } = React.useContext(PlatformContext);
+-    return useQuery(['useWorkspace', projectIds, platformUrl, platformAuthToken], () => getWorkspace({ projectIds, platformUrl, platformAuthToken }));
++  const { platformUrl, platformAuthToken } = React.useContext(PlatformContext);
++  return useQuery(
++    ['useWorkspace', projectIds, platformUrl, platformAuthToken],
++    () => getWorkspace({ projectIds, platformUrl, platformAuthToken })
++  );
+ }
+ 
+-export { BranchSelector, DevPortalProvider, NodeContent, ResponseError, Search, StoplightProject, TableOfContents, getBranches, getNodeContent, getNodes, getTableOfContents, getWorkspace, useGetBranches, useGetNodeContent, useGetNodes, useGetTableOfContents, useGetWorkspace };
++export {
++  BranchSelector,
++  DevPortalProvider,
++  NodeContent,
++  ResponseError,
++  Search,
++  StoplightProject,
++  TableOfContents,
++  getBranches,
++  getNodeContent,
++  getNodes,
++  getTableOfContents,
++  getWorkspace,
++  useGetBranches,
++  useGetNodeContent,
++  useGetNodes,
++  useGetTableOfContents,
++  useGetWorkspace,
++};
+diff --git a/node_modules/@stoplight/elements-dev-portal/index.js b/node_modules/@stoplight/elements-dev-portal/index.js
+index 372dcdf..b7cb58a 100644
+--- a/node_modules/@stoplight/elements-dev-portal/index.js
++++ b/node_modules/@stoplight/elements-dev-portal/index.js
+@@ -14,7 +14,9 @@ var freeSolidSvgIcons = require('@fortawesome/free-solid-svg-icons');
+ var reactQuery = require('react-query');
+ var useDebounce = require('use-debounce');
+ 
+-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
++function _interopDefaultLegacy(e) {
++  return e && typeof e === 'object' && 'default' in e ? e : { default: e };
++}
+ 
+ function _interopNamespace(e) {
+   if (e && e.__esModule) return e;
+@@ -23,129 +25,343 @@ function _interopNamespace(e) {
+     Object.keys(e).forEach(function (k) {
+       if (k !== 'default') {
+         var d = Object.getOwnPropertyDescriptor(e, k);
+-        Object.defineProperty(n, k, d.get ? d : {
+-          enumerable: true,
+-          get: function () { return e[k]; }
+-        });
++        Object.defineProperty(
++          n,
++          k,
++          d.get
++            ? d
++            : {
++                enumerable: true,
++                get: function () {
++                  return e[k];
++                },
++              }
++        );
+       }
+     });
+   }
+-  n["default"] = e;
++  n['default'] = e;
+   return Object.freeze(n);
+ }
+ 
+-var React__namespace = /*#__PURE__*/_interopNamespace(React);
+-var React__default = /*#__PURE__*/_interopDefaultLegacy(React);
++var React__namespace = /*#__PURE__*/ _interopNamespace(React);
++var React__default = /*#__PURE__*/ _interopDefaultLegacy(React);
+ 
+ const BranchSelector = ({ branchSlug, branches, onChange }) => {
+-    const currentBranch = branches.find(branch => (!branchSlug ? branch.is_default : branch.slug === branchSlug));
+-    const handleChange = React__namespace.useCallback((selectedSlug) => {
+-        const selectedBranch = branches.find(branch => branch.slug === selectedSlug);
+-        if (selectedBranch) {
+-            onChange(selectedBranch);
+-        }
+-    }, [onChange, branches]);
+-    return (React__namespace.createElement(mosaic.Menu, { "aria-label": "Versions", placement: "bottom left", closeOnPress: true, matchTriggerWidth: true, renderTrigger: ({ isOpen }) => (React__namespace.createElement(mosaic.FieldButton, { w: "full", icon: "layer-group", px: 4, h: "md", active: isOpen, borderR: 0, roundedR: "none" }, (currentBranch === null || currentBranch === void 0 ? void 0 : currentBranch.name) || (currentBranch === null || currentBranch === void 0 ? void 0 : currentBranch.slug) || 'Choose a version')), items: [
+-            {
+-                type: 'option_group',
+-                title: 'Versions',
+-                onChange: handleChange,
+-                value: (currentBranch === null || currentBranch === void 0 ? void 0 : currentBranch.slug) || '',
+-                children: branches.map(branch => ({
+-                    label: branch.name || branch.slug,
+-                    value: branch.slug,
+-                    meta: branch.is_default ? 'Default' : undefined,
+-                })),
+-            },
+-        ] }));
++  const currentBranch = branches.find((branch) =>
++    !branchSlug ? branch.is_default : branch.slug === branchSlug
++  );
++  const handleChange = React__namespace.useCallback(
++    (selectedSlug) => {
++      const selectedBranch = branches.find(
++        (branch) => branch.slug === selectedSlug
++      );
++      if (selectedBranch) {
++        onChange(selectedBranch);
++      }
++    },
++    [onChange, branches]
++  );
++  return React__namespace.createElement(mosaic.Menu, {
++    'aria-label': 'Versions',
++    placement: 'bottom left',
++    closeOnPress: true,
++    matchTriggerWidth: true,
++    renderTrigger: ({ isOpen }) =>
++      React__namespace.createElement(
++        mosaic.FieldButton,
++        {
++          w: 'full',
++          icon: 'layer-group',
++          px: 4,
++          h: 'md',
++          active: isOpen,
++          borderR: 0,
++          roundedR: 'none',
++        },
++        (currentBranch === null || currentBranch === void 0
++          ? void 0
++          : currentBranch.name) ||
++          (currentBranch === null || currentBranch === void 0
++            ? void 0
++            : currentBranch.slug) ||
++          'Choose a version'
++      ),
++    items: [
++      {
++        type: 'option_group',
++        title: 'Versions',
++        onChange: handleChange,
++        value:
++          (currentBranch === null || currentBranch === void 0
++            ? void 0
++            : currentBranch.slug) || '',
++        children: branches.map((branch) => ({
++          label: branch.name || branch.slug,
++          value: branch.slug,
++          meta: branch.is_default ? 'Default' : undefined,
++        })),
++      },
++    ],
++  });
+ };
+ 
+-const PlatformContext = React__namespace.createContext({ platformUrl: 'https://stoplight.io' });
+-const PlatformProvider = ({ platformUrl = 'https://stoplight.io', platformAuthToken, children, }) => {
+-    return (React__namespace.createElement(PlatformContext.Provider, { value: { platformUrl, platformAuthToken } },
+-        React__namespace.createElement(mosaic.Provider, null, children)));
++const PlatformContext = React__namespace.createContext({
++  platformUrl: 'https://stoplight.io',
++});
++const PlatformProvider = ({
++  platformUrl = 'https://stoplight.io',
++  platformAuthToken,
++  children,
++}) => {
++  return React__namespace.createElement(
++    PlatformContext.Provider,
++    { value: { platformUrl, platformAuthToken } },
++    React__namespace.createElement(mosaic.Provider, null, children)
++  );
+ };
+-const DevPortalProvider = elementsCore.withQueryClientProvider(PlatformProvider);
+-
+-const NodeContent = ({ node, Link, hideTryIt, hideTryItPanel, hideMocking, hideExport, tryItCredentialsPolicy, tryItCorsProxy, }) => {
+-    return (React__namespace.createElement(elementsCore.PersistenceContextProvider, null,
+-        React__namespace.createElement(NodeLinkContext.Provider, { value: [node, Link] },
+-            React__namespace.createElement(elementsCore.MarkdownComponentsProvider, { value: { a: LinkComponent } },
+-                React__namespace.createElement(elementsCore.MockingProvider, { mockUrl: node.links.mock_url, hideMocking: hideMocking },
+-                    React__namespace.createElement(elementsCore.Docs, { nodeType: node.type, nodeData: node.data, nodeTitle: node.title, layoutOptions: {
+-                            hideTryIt: hideTryIt,
+-                            hideTryItPanel: hideTryItPanel,
+-                            hideExport: hideExport || node.links.export_url === undefined,
+-                        }, useNodeForRefResolving: true, tryItCorsProxy: tryItCorsProxy, exportProps: [types.NodeType.HttpService, types.NodeType.Model].includes(node.type)
+-                            ? {
+-                                original: {
+-                                    href: node.links.export_url,
+-                                },
+-                                bundled: {
+-                                    href: getBundledUrl(node.links.export_url),
+-                                },
+-                            }
+-                            : undefined, tryItCredentialsPolicy: tryItCredentialsPolicy }))))));
++const DevPortalProvider = elementsCore.withQueryClientProvider(
++  PlatformProvider
++);
++
++const NodeContent = ({
++  node,
++  Link,
++  hideTryIt,
++  hideTryItPanel,
++  hideMocking,
++  hideExport,
++  tryItCredentialsPolicy,
++  tryItCorsProxy,
++}) => {
++  return React__namespace.createElement(
++    elementsCore.PersistenceContextProvider,
++    null,
++    React__namespace.createElement(
++      NodeLinkContext.Provider,
++      { value: [node, Link] },
++      React__namespace.createElement(
++        elementsCore.MarkdownComponentsProvider,
++        { value: { a: LinkComponent } },
++        React__namespace.createElement(
++          elementsCore.MockingProvider,
++          { mockUrl: node.links.mock_url, hideMocking: hideMocking },
++          React__namespace.createElement(elementsCore.Docs, {
++            nodeType: node.type,
++            nodeData: node.data,
++            nodeTitle: node.title,
++            layoutOptions: {
++              hideTryIt: hideTryIt,
++              hideTryItPanel: hideTryItPanel,
++              hideExport: hideExport || node.links.export_url === undefined,
++            },
++            useNodeForRefResolving: true,
++            tryItCorsProxy: tryItCorsProxy,
++            exportProps: [
++              types.NodeType.HttpService,
++              types.NodeType.Model,
++            ].includes(node.type)
++              ? {
++                  original: {
++                    href: node.links.export_url,
++                  },
++                  bundled: {
++                    href: getBundledUrl(node.links.export_url),
++                  },
++                }
++              : undefined,
++            tryItCredentialsPolicy: tryItCredentialsPolicy,
++          })
++        )
++      )
++    )
++  );
+ };
+ const NodeLinkContext = React__namespace.createContext(undefined);
+ const externalRegex = new RegExp('^(?:[a-z]+:)?//', 'i');
+ const LinkComponent = ({ children, href }) => {
+-    const ctx = React__namespace.useContext(NodeLinkContext);
+-    if (href && externalRegex.test(href)) {
+-        return (React__namespace.createElement("a", { href: href, target: "_blank", rel: "noreferrer" }, children));
+-    }
+-    if (href && ctx) {
+-        const [node, Link] = ctx;
+-        const resolvedUri = path.resolve(path.dirname(node.uri), href);
+-        const [resolvedUriWithoutAnchor, hash] = resolvedUri.split('#');
+-        const decodedUrl = decodeURIComponent(href);
+-        const decodedResolvedUriWithoutAnchor = decodeURIComponent(resolvedUriWithoutAnchor);
+-        const edge = node.outbound_edges.find(edge => edge.uri === decodedUrl || edge.uri === decodedResolvedUriWithoutAnchor);
+-        if (edge) {
+-            return (React__namespace.createElement(Link, { to: edge.slug, hash: hash }, children));
+-        }
++  const ctx = React__namespace.useContext(NodeLinkContext);
++  if (href && externalRegex.test(href)) {
++    return React__namespace.createElement(
++      'a',
++      { href: href, target: '_blank', rel: 'noreferrer' },
++      children
++    );
++  }
++  if (href && ctx) {
++    const [node, Link] = ctx;
++    const resolvedUri = path.resolve(path.dirname(node.uri), href);
++    const [resolvedUriWithoutAnchor, hash] = resolvedUri.split('#');
++    const decodedUrl = decodeURIComponent(href);
++    const decodedResolvedUriWithoutAnchor = decodeURIComponent(
++      resolvedUriWithoutAnchor
++    );
++    const edge = node.outbound_edges.find(
++      (edge) =>
++        edge.uri === decodedUrl || edge.uri === decodedResolvedUriWithoutAnchor
++    );
++    if (edge) {
++      return React__namespace.createElement(
++        Link,
++        { to: edge.slug, hash: hash },
++        children
++      );
+     }
+-    return React__namespace.createElement("a", { href: href }, children);
++  }
++  return React__namespace.createElement('a', { href: href }, children);
+ };
+ function getBundledUrl(url) {
+-    if (url === undefined)
+-        return undefined;
+-    const bundledUrl = new URL(url);
+-    const searchParams = new URLSearchParams(bundledUrl.search);
+-    searchParams.append('deref', 'optimizedBundle');
+-    bundledUrl.search = searchParams.toString();
+-    return bundledUrl.toString();
++  if (url === undefined) return undefined;
++  const bundledUrl = new URL(url);
++  const searchParams = new URLSearchParams(bundledUrl.search);
++  searchParams.append('deref', 'optimizedBundle');
++  bundledUrl.search = searchParams.toString();
++  return bundledUrl.toString();
+ }
+ 
+-const SearchImpl = ({ search, searchResults, isOpen, onClose, onClick, onSearch }) => {
+-    const listBoxRef = React__namespace.useRef(null);
+-    const onChange = React__namespace.useCallback(e => onSearch(e.currentTarget.value), [onSearch]);
+-    const onKeyDown = React__namespace.useCallback(e => {
+-        var _a;
+-        if (e.key === 'ArrowDown') {
+-            e.preventDefault();
+-            (_a = listBoxRef.current) === null || _a === void 0 ? void 0 : _a.focus();
+-        }
+-    }, []);
+-    const onSelectionChange = React__namespace.useCallback(keys => {
+-        const selectedId = keys.values().next().value;
+-        const selectedResult = searchResults === null || searchResults === void 0 ? void 0 : searchResults.find(searchResult => `${searchResult.id}-${searchResult.project_id}` === selectedId);
+-        if (selectedResult) {
+-            onClick(selectedResult);
+-        }
+-    }, [searchResults, onClick]);
+-    return (React__namespace.createElement(mosaic.Modal, { renderHeader: () => (React__namespace.createElement(mosaic.Input, { appearance: "minimal", borderB: true, size: "lg", icon: React__namespace.createElement(mosaic.Box, { as: mosaic.Icon, ml: 1, icon: faSearch.faSearch }), autoFocus: true, placeholder: "Search...", value: search, onChange: onChange, onKeyDown: onKeyDown })), isOpen: !!isOpen, onClose: onClose }, searchResults && searchResults.length > 0 ? (React__namespace.createElement(mosaic.ListBox, { ref: listBoxRef, "aria-label": "Search", overflowY: "auto", h: 80, m: -5, items: searchResults, selectionMode: "single", onSelectionChange: onSelectionChange }, (searchResult) => {
+-        var _a, _b;
+-        return (React__namespace.createElement(mosaic.ListBoxItem, { key: `${searchResult.id}-${searchResult.project_id}`, textValue: searchResult.title },
+-            React__namespace.createElement(mosaic.Box, { p: 3, borderB: true },
+-                React__namespace.createElement(mosaic.Flex, { align: "center" },
+-                    React__namespace.createElement(mosaic.Box, { as: mosaic.Icon, w: 4, icon: elementsCore.NodeTypeIconDefs[searchResult.type], style: { color: elementsCore.NodeTypeColors[searchResult.type] } }),
+-                    React__namespace.createElement(mosaic.Box, { flex: 1, fontSize: "lg", dangerouslySetInnerHTML: { __html: (_a = searchResult.highlighted.name) !== null && _a !== void 0 ? _a : '' }, fontWeight: "medium", textOverflow: "overflow-ellipsis", mx: 2 }),
+-                    React__namespace.createElement(mosaic.Box, { fontSize: "sm", color: "muted" }, searchResult.project_name)),
+-                React__namespace.createElement(mosaic.Box, { dangerouslySetInnerHTML: { __html: (_b = searchResult.highlighted.summary) !== null && _b !== void 0 ? _b : '' }, color: "muted", fontSize: "sm", mt: 1, ml: 6 }))));
+-    })) : (React__namespace.createElement(mosaic.Flex, { w: "full", h: 80, align: "center", justify: "center", m: -5 }, "No search results"))));
++const SearchImpl = ({
++  search,
++  searchResults,
++  isOpen,
++  onClose,
++  onClick,
++  onSearch,
++}) => {
++  const listBoxRef = React__namespace.useRef(null);
++  const onChange = React__namespace.useCallback(
++    (e) => onSearch(e.currentTarget.value),
++    [onSearch]
++  );
++  const onKeyDown = React__namespace.useCallback((e) => {
++    var _a;
++    if (e.key === 'ArrowDown') {
++      e.preventDefault();
++      (_a = listBoxRef.current) === null || _a === void 0 ? void 0 : _a.focus();
++    }
++  }, []);
++  const onSelectionChange = React__namespace.useCallback(
++    (keys) => {
++      const selectedId = keys.values().next().value;
++      const selectedResult =
++        searchResults === null || searchResults === void 0
++          ? void 0
++          : searchResults.find(
++              (searchResult) =>
++                `${searchResult.id}-${searchResult.project_id}` === selectedId
++            );
++      if (selectedResult) {
++        onClick(selectedResult);
++      }
++    },
++    [searchResults, onClick]
++  );
++  return React__namespace.createElement(
++    mosaic.Modal,
++    {
++      renderHeader: () =>
++        React__namespace.createElement(mosaic.Input, {
++          appearance: 'minimal',
++          borderB: true,
++          size: 'lg',
++          icon: React__namespace.createElement(mosaic.Box, {
++            as: mosaic.Icon,
++            ml: 1,
++            icon: faSearch.faSearch,
++          }),
++          autoFocus: true,
++          placeholder: 'Search...',
++          value: search,
++          onChange: onChange,
++          onKeyDown: onKeyDown,
++        }),
++      isOpen: !!isOpen,
++      onClose: onClose,
++    },
++    searchResults && searchResults.length > 0
++      ? React__namespace.createElement(
++          mosaic.ListBox,
++          {
++            ref: listBoxRef,
++            'aria-label': 'Search',
++            overflowY: 'auto',
++            h: 80,
++            m: -5,
++            items: searchResults,
++            selectionMode: 'single',
++            onSelectionChange: onSelectionChange,
++          },
++          (searchResult) => {
++            var _a, _b;
++            return React__namespace.createElement(
++              mosaic.ListBoxItem,
++              {
++                key: `${searchResult.id}-${searchResult.project_id}`,
++                textValue: searchResult.title,
++              },
++              React__namespace.createElement(
++                mosaic.Box,
++                { p: 3, borderB: true },
++                React__namespace.createElement(
++                  mosaic.Flex,
++                  { align: 'center' },
++                  React__namespace.createElement(mosaic.Box, {
++                    as: mosaic.Icon,
++                    w: 4,
++                    icon: elementsCore.NodeTypeIconDefs[searchResult.type],
++                    style: {
++                      color: elementsCore.NodeTypeColors[searchResult.type],
++                    },
++                  }),
++                  React__namespace.createElement(mosaic.Box, {
++                    flex: 1,
++                    fontSize: 'lg',
++                    dangerouslySetInnerHTML: {
++                      __html:
++                        (_a = searchResult.highlighted.name) !== null &&
++                        _a !== void 0
++                          ? _a
++                          : '',
++                    },
++                    fontWeight: 'medium',
++                    textOverflow: 'overflow-ellipsis',
++                    mx: 2,
++                  }),
++                  React__namespace.createElement(
++                    mosaic.Box,
++                    { fontSize: 'sm', color: 'muted' },
++                    searchResult.project_name
++                  )
++                ),
++                React__namespace.createElement(mosaic.Box, {
++                  dangerouslySetInnerHTML: {
++                    __html:
++                      (_b = searchResult.highlighted.summary) !== null &&
++                      _b !== void 0
++                        ? _b
++                        : '',
++                  },
++                  color: 'muted',
++                  fontSize: 'sm',
++                  mt: 1,
++                  ml: 6,
++                })
++              )
++            );
++          }
++        )
++      : React__namespace.createElement(
++          mosaic.Flex,
++          { w: 'full', h: 80, align: 'center', justify: 'center', m: -5 },
++          'No search results'
++        )
++  );
+ };
+-const Search = fp.pipe(elementsCore.withStyles, elementsCore.withPersistenceBoundary, elementsCore.withMosaicProvider, elementsCore.withQueryClientProvider)(SearchImpl);
++const Search = fp.pipe(
++  elementsCore.withStyles,
++  elementsCore.withPersistenceBoundary,
++  elementsCore.withMosaicProvider,
++  elementsCore.withQueryClientProvider
++)(SearchImpl);
+ 
+ /*! *****************************************************************************
+ Copyright (c) Microsoft Corporation.
+@@ -163,241 +379,608 @@ PERFORMANCE OF THIS SOFTWARE.
+ ***************************************************************************** */
+ 
+ function __rest(s, e) {
+-    var t = {};
+-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+-        t[p] = s[p];
+-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+-                t[p[i]] = s[p[i]];
+-        }
+-    return t;
++  var t = {};
++  for (var p in s)
++    if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
++      t[p] = s[p];
++  if (s != null && typeof Object.getOwnPropertySymbols === 'function')
++    for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
++      if (
++        e.indexOf(p[i]) < 0 &&
++        Object.prototype.propertyIsEnumerable.call(s, p[i])
++      )
++        t[p[i]] = s[p[i]];
++    }
++  return t;
+ }
+ 
+ function __awaiter(thisArg, _arguments, P, generator) {
+-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+-    return new (P || (P = Promise))(function (resolve, reject) {
+-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+-        step((generator = generator.apply(thisArg, _arguments || [])).next());
+-    });
++  function adopt(value) {
++    return value instanceof P
++      ? value
++      : new P(function (resolve) {
++          resolve(value);
++        });
++  }
++  return new (P || (P = Promise))(function (resolve, reject) {
++    function fulfilled(value) {
++      try {
++        step(generator.next(value));
++      } catch (e) {
++        reject(e);
++      }
++    }
++    function rejected(value) {
++      try {
++        step(generator['throw'](value));
++      } catch (e) {
++        reject(e);
++      }
++    }
++    function step(result) {
++      result.done
++        ? resolve(result.value)
++        : adopt(result.value).then(fulfilled, rejected);
++    }
++    step((generator = generator.apply(thisArg, _arguments || [])).next());
++  });
+ }
+ 
+ const TableOfContents = (_a) => {
+-    var { tableOfContents, activeId, Link, collapseTableOfContents = false, externalScrollbar, onLinkClick } = _a, boxProps = __rest(_a, ["tableOfContents", "activeId", "Link", "collapseTableOfContents", "externalScrollbar", "onLinkClick"]);
+-    return (React__namespace.createElement(mosaic.Flex, Object.assign({ bg: "canvas-100" }, boxProps, { flexDirection: "col", maxH: "full" }),
+-        React__namespace.createElement(mosaic.Flex, { flexGrow: true, flexShrink: true, overflowY: "auto" },
+-            React__namespace.createElement(elementsCore.TableOfContents, { tree: tableOfContents.items, activeId: activeId, Link: Link, maxDepthOpenByDefault: collapseTableOfContents ? 0 : 1, externalScrollbar: externalScrollbar, onLinkClick: onLinkClick })),
+-        tableOfContents.hide_powered_by ? null : (React__namespace.createElement(elementsCore.PoweredByLink, { source: activeId, pathname: typeof window !== 'undefined' ? window.location.pathname : '', packageType: "elements-dev-portal" }))));
++  var {
++      tableOfContents,
++      activeId,
++      Link,
++      collapseTableOfContents = false,
++      externalScrollbar,
++      onLinkClick,
++    } = _a,
++    boxProps = __rest(_a, [
++      'tableOfContents',
++      'activeId',
++      'Link',
++      'collapseTableOfContents',
++      'externalScrollbar',
++      'onLinkClick',
++    ]);
++  return React__namespace.createElement(
++    mosaic.Flex,
++    Object.assign({ bg: 'canvas-100' }, boxProps, {
++      flexDirection: 'col',
++      maxH: 'full',
++    }),
++    React__namespace.createElement(
++      mosaic.Flex,
++      { flexGrow: true, flexShrink: true, overflowY: 'auto' },
++      React__namespace.createElement(elementsCore.TableOfContents, {
++        tree: tableOfContents.items,
++        activeId: activeId,
++        Link: Link,
++        maxDepthOpenByDefault: collapseTableOfContents ? 0 : 1,
++        externalScrollbar: externalScrollbar,
++        onLinkClick: onLinkClick,
++      })
++    ),
++    tableOfContents.hide_powered_by
++      ? null
++      : React__namespace.createElement(elementsCore.PoweredByLink, {
++          source: activeId,
++          pathname:
++            typeof window !== 'undefined' ? window.location.pathname : '',
++          packageType: 'elements-dev-portal',
++        })
++  );
+ };
+ 
+-const Forbidden = () => (React__default["default"].createElement(mosaic.Flex, { align: "center", justify: "center", flexGrow: true },
+-    React__default["default"].createElement(mosaic.VStack, { spacing: 4, align: "center" },
+-        React__default["default"].createElement(mosaic.Heading, { size: 1 }, "Forbidden"),
+-        React__default["default"].createElement(mosaic.Box, { as: "p" }, "You don't have permission to access this resource"))));
+-
+-const Loading = () => (React__default["default"].createElement(mosaic.Flex, { justify: "center", alignItems: "center", w: "full", minH: "screen", color: "muted" },
+-    React__default["default"].createElement(mosaic.Icon, { icon: freeSolidSvgIcons.faCircleNotch, size: "3x", spin: true })));
+-
+-const NotFound = () => (React__default["default"].createElement(mosaic.Flex, { align: "center", justify: "center", flexGrow: true },
+-    React__default["default"].createElement(mosaic.VStack, { spacing: 4, align: "center" },
+-        React__default["default"].createElement(mosaic.Heading, { size: 1 }, "Not Found"),
+-        React__default["default"].createElement(mosaic.Box, { as: "p" }, "Could not find what you are looking for"))));
+-
+-const UpgradeToStarter = () => (React__default["default"].createElement(mosaic.Flex, { as: "a", href: "https://stoplight.io/pricing/", target: "_blank", rel: "noreferrer noopener", justify: "center", alignItems: "center", w: "full", minH: "screen", color: "muted", flexDirection: "col" },
+-    React__default["default"].createElement(mosaic.Icon, { icon: freeSolidSvgIcons.faExclamationTriangle, size: "4x" }),
+-    React__default["default"].createElement(mosaic.Box, { pt: 3 }, "Please upgrade your Stoplight Workspace to the Starter Plan to use Elements Dev Portal in production.")));
++const Forbidden = () =>
++  React__default['default'].createElement(
++    mosaic.Flex,
++    { align: 'center', justify: 'center', flexGrow: true },
++    React__default['default'].createElement(
++      mosaic.VStack,
++      { spacing: 4, align: 'center' },
++      React__default['default'].createElement(
++        mosaic.Heading,
++        { size: 1 },
++        'Forbidden'
++      ),
++      React__default['default'].createElement(
++        mosaic.Box,
++        { as: 'p' },
++        "You don't have permission to access this resource"
++      )
++    )
++  );
++
++const Loading = () =>
++  React__default['default'].createElement(
++    mosaic.Flex,
++    {
++      justify: 'center',
++      alignItems: 'center',
++      w: 'full',
++      minH: 'screen',
++      color: 'muted',
++    },
++    React__default['default'].createElement(mosaic.Icon, {
++      icon: freeSolidSvgIcons.faCircleNotch,
++      size: '3x',
++      spin: true,
++    })
++  );
++
++const NotFound = () =>
++  React__default['default'].createElement(
++    mosaic.Flex,
++    { align: 'center', justify: 'center', flexGrow: true },
++    React__default['default'].createElement(
++      mosaic.VStack,
++      { spacing: 4, align: 'center' },
++      React__default['default'].createElement(
++        mosaic.Heading,
++        { size: 1 },
++        'Not Found'
++      ),
++      React__default['default'].createElement(
++        mosaic.Box,
++        { as: 'p' },
++        'Could not find what you are looking for'
++      )
++    )
++  );
++
++const UpgradeToStarter = () =>
++  React__default['default'].createElement(
++    mosaic.Flex,
++    {
++      as: 'a',
++      href: 'https://stoplight.io/pricing/',
++      target: '_blank',
++      rel: 'noreferrer noopener',
++      justify: 'center',
++      alignItems: 'center',
++      w: 'full',
++      minH: 'screen',
++      color: 'muted',
++      flexDirection: 'col',
++    },
++    React__default['default'].createElement(mosaic.Icon, {
++      icon: freeSolidSvgIcons.faExclamationTriangle,
++      size: '4x',
++    }),
++    React__default['default'].createElement(
++      mosaic.Box,
++      { pt: 3 },
++      'Please upgrade your Stoplight Workspace to the Starter Plan to use Elements Dev Portal in production.'
++    )
++  );
+ 
+ const appVersion = '1.4.3';
+ 
+ class ResponseError extends Error {
+-    constructor(message, responseCode) {
+-        super(message);
+-        this.name = 'ResponseError';
+-        this.code = responseCode;
+-    }
++  constructor(message, responseCode) {
++    super(message);
++    this.name = 'ResponseError';
++    this.code = responseCode;
++  }
+ }
+-const getNodeContent = ({ nodeSlug, projectId, branchSlug, platformUrl = 'https://stoplight.io', platformAuthToken, }) => __awaiter(void 0, void 0, void 0, function* () {
++const getNodeContent = ({
++  nodeSlug,
++  projectId,
++  branchSlug,
++  platformUrl = 'https://stoplight.io',
++  platformAuthToken,
++}) =>
++  __awaiter(void 0, void 0, void 0, function* () {
+     const nodeId = getNodeIdFromSlug(nodeSlug);
+     const branchQuery = branchSlug ? `?branch=${branchSlug}` : '';
+-    const response = yield fetch(`${platformUrl}/api/v1/projects/${projectId}/nodes/${nodeId}${branchQuery}`, {
+-        headers: Object.assign({ 'Stoplight-Elements-Version': appVersion }, (platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` })),
+-    });
++    const response = yield fetch(
++      `${platformUrl}/api/v1/projects/${projectId}/nodes/${nodeId}${branchQuery}`,
++      {
++        headers: Object.assign(
++          { 'Stoplight-Elements-Version': appVersion },
++          platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` }
++        ),
++      }
++    );
+     const data = yield response.json();
+     if (!response.ok) {
+-        if (response.status === 402) {
+-            throw new ResponseError('Payment Required', response.status);
+-        }
+-        else if (response.status === 403) {
+-            throw new ResponseError('Forbidden', response.status);
+-        }
+-        else {
+-            throw new ResponseError('Something went wrong', response.status);
+-        }
++      if (response.status === 402) {
++        throw new ResponseError('Payment Required', response.status);
++      } else if (response.status === 403) {
++        throw new ResponseError('Forbidden', response.status);
++      } else {
++        throw new ResponseError('Something went wrong', response.status);
++      }
+     }
+     return data;
+-});
++  });
+ function getNodeIdFromSlug(nodeSlug) {
+-    return nodeSlug.split('-')[0];
++  return nodeSlug.split('-')[0];
+ }
+ 
+-const getBranches = ({ projectId, platformUrl = 'https://stoplight.io', platformAuthToken, }) => __awaiter(void 0, void 0, void 0, function* () {
+-    const response = yield fetch(`${platformUrl}/api/v1/projects/${projectId}/branches`, {
+-        headers: Object.assign({ 'Stoplight-Elements-Version': appVersion }, (platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` })),
+-    });
++const getBranches = ({
++  projectId,
++  platformUrl = 'https://stoplight.io',
++  platformAuthToken,
++}) =>
++  __awaiter(void 0, void 0, void 0, function* () {
++    const response = yield fetch(
++      `${platformUrl}/api/v1/projects/${projectId}/branches`,
++      {
++        headers: Object.assign(
++          { 'Stoplight-Elements-Version': appVersion },
++          platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` }
++        ),
++      }
++    );
+     const data = yield response.json();
+     if (!response.ok) {
+-        throw new Error(data);
++      throw new Error(data);
+     }
+     return data;
+-});
++  });
+ 
+ function useGetBranches({ projectId }) {
+-    const { platformUrl, platformAuthToken } = React__namespace.useContext(PlatformContext);
+-    return reactQuery.useQuery(['branches', projectId, platformUrl, platformAuthToken], () => getBranches({ projectId, platformUrl, platformAuthToken }), {
+-        enabled: projectId ? true : false,
+-    });
++  const { platformUrl, platformAuthToken } = React__namespace.useContext(
++    PlatformContext
++  );
++  return reactQuery.useQuery(
++    ['branches', projectId, platformUrl, platformAuthToken],
++    () => getBranches({ projectId, platformUrl, platformAuthToken }),
++    {
++      enabled: projectId ? true : false,
++    }
++  );
+ }
+ 
+-function useGetNodeContent({ nodeSlug, projectId, branchSlug, }) {
+-    const { platformUrl, platformAuthToken } = React__namespace.useContext(PlatformContext);
+-    return reactQuery.useQuery(['useNodeContent', nodeSlug, projectId, branchSlug, platformUrl, platformAuthToken], () => getNodeContent({ nodeSlug, projectId, branchSlug, platformUrl, platformAuthToken }), { enabled: nodeSlug && projectId ? true : false });
++function useGetNodeContent({ nodeSlug, projectId, branchSlug }) {
++  const { platformUrl, platformAuthToken } = React__namespace.useContext(
++    PlatformContext
++  );
++  return reactQuery.useQuery(
++    [
++      'useNodeContent',
++      nodeSlug,
++      projectId,
++      branchSlug,
++      platformUrl,
++      platformAuthToken,
++    ],
++    () =>
++      getNodeContent({
++        nodeSlug,
++        projectId,
++        branchSlug,
++        platformUrl,
++        platformAuthToken,
++      }),
++    { enabled: nodeSlug && projectId ? true : false }
++  );
+ }
+ 
+-const getTableOfContents = ({ projectId, branchSlug, platformUrl = 'https://stoplight.io', platformAuthToken, }) => __awaiter(void 0, void 0, void 0, function* () {
++const getTableOfContents = ({
++  projectId,
++  branchSlug,
++  platformUrl = 'https://stoplight.io',
++  platformAuthToken,
++}) =>
++  __awaiter(void 0, void 0, void 0, function* () {
+     const branchQuery = branchSlug ? `?branch=${branchSlug}` : '';
+-    const response = yield fetch(`${platformUrl}/api/v1/projects/${projectId}/table-of-contents${branchQuery}`, {
+-        headers: Object.assign({ 'Stoplight-Elements-Version': appVersion }, (platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` })),
+-    });
++    const response = yield fetch(
++      `${platformUrl}/api/v1/projects/${projectId}/table-of-contents${branchQuery}`,
++      {
++        headers: Object.assign(
++          { 'Stoplight-Elements-Version': appVersion },
++          platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` }
++        ),
++      }
++    );
+     const data = yield response.json();
+     if (!response.ok) {
+-        throw new Error(data);
++      throw new Error(data);
+     }
+     return data;
+-});
++  });
+ 
+ function useGetTableOfContents({ projectId, branchSlug }) {
+-    const { platformUrl, platformAuthToken } = React__namespace.useContext(PlatformContext);
+-    return reactQuery.useQuery(['tableOfContents', projectId, branchSlug, platformUrl, platformAuthToken], () => getTableOfContents({ projectId, branchSlug, platformUrl, platformAuthToken }), { enabled: projectId ? true : false });
+-}
+-
+-const StoplightProjectImpl = ({ projectId, hideTryIt, hideMocking, hideExport, collapseTableOfContents = false, tryItCredentialsPolicy, tryItCorsProxy, }) => {
+-    const { branchSlug = '', nodeSlug = '' } = reactRouterDom.useParams();
+-    const history = reactRouterDom.useHistory();
+-    const { data: tableOfContents, isFetched: isTocFetched } = useGetTableOfContents({ projectId, branchSlug });
+-    const { data: branches } = useGetBranches({ projectId });
+-    const { data: node, isLoading: isLoadingNode, isError, error: nodeError, } = useGetNodeContent({
+-        nodeSlug,
++  const { platformUrl, platformAuthToken } = React__namespace.useContext(
++    PlatformContext
++  );
++  return reactQuery.useQuery(
++    ['tableOfContents', projectId, branchSlug, platformUrl, platformAuthToken],
++    () =>
++      getTableOfContents({
+         projectId,
+         branchSlug,
+-    });
+-    const container = React__namespace.useRef(null);
+-    if (!nodeSlug && isTocFetched && (tableOfContents === null || tableOfContents === void 0 ? void 0 : tableOfContents.items)) {
+-        const firstNode = elementsCore.findFirstNode(tableOfContents.items);
+-        if (firstNode) {
+-            return React__namespace.createElement(reactRouterDom.Redirect, { to: branchSlug ? `/branches/${branchSlug}/${firstNode.slug}` : `/${firstNode.slug}` });
+-        }
+-    }
+-    let elem;
+-    if (isLoadingNode || !isTocFetched) {
+-        elem = React__namespace.createElement(Loading, null);
+-    }
+-    else if (isError) {
+-        if (nodeError instanceof ResponseError) {
+-            if (nodeError.code === 402) {
+-                elem = React__namespace.createElement(UpgradeToStarter, null);
+-            }
+-            else if (nodeError.code === 403) {
+-                elem = React__namespace.createElement(Forbidden, null);
+-            }
+-            else {
+-                elem = React__namespace.createElement(NotFound, null);
+-            }
+-        }
+-        else {
+-            elem = React__namespace.createElement(NotFound, null);
+-        }
++        platformUrl,
++        platformAuthToken,
++      }),
++    { enabled: projectId ? true : false }
++  );
++}
++
++const StoplightProjectImpl = ({
++  projectId,
++  hideTryIt,
++  hideMocking,
++  hideExport,
++  collapseTableOfContents = false,
++  tryItCredentialsPolicy,
++  tryItCorsProxy,
++}) => {
++  const { branchSlug = '', nodeSlug = '' } = reactRouterDom.useParams();
++  const history = reactRouterDom.useHistory();
++  const {
++    data: tableOfContents,
++    isFetched: isTocFetched,
++  } = useGetTableOfContents({ projectId, branchSlug });
++  const { data: branches } = useGetBranches({ projectId });
++  const {
++    data: node,
++    isLoading: isLoadingNode,
++    isError,
++    error: nodeError,
++  } = useGetNodeContent({
++    nodeSlug,
++    projectId,
++    branchSlug,
++  });
++  const container = React__namespace.useRef(null);
++  if (
++    !nodeSlug &&
++    isTocFetched &&
++    (tableOfContents === null || tableOfContents === void 0
++      ? void 0
++      : tableOfContents.items)
++  ) {
++    const firstNode = elementsCore.findFirstNode(tableOfContents.items);
++    if (firstNode) {
++      return React__namespace.createElement(reactRouterDom.Redirect, {
++        to: branchSlug
++          ? `/branches/${branchSlug}/${firstNode.slug}`
++          : `/${firstNode.slug}`,
++      });
+     }
+-    else if (!node) {
++  }
++  let elem;
++  if (isLoadingNode || !isTocFetched) {
++    elem = React__namespace.createElement(Loading, null);
++  } else if (isError) {
++    if (nodeError instanceof ResponseError) {
++      if (nodeError.code === 402) {
++        elem = React__namespace.createElement(UpgradeToStarter, null);
++      } else if (nodeError.code === 403) {
++        elem = React__namespace.createElement(Forbidden, null);
++      } else {
+         elem = React__namespace.createElement(NotFound, null);
++      }
++    } else {
++      elem = React__namespace.createElement(NotFound, null);
+     }
+-    else {
+-        elem = (React__namespace.createElement(NodeContent, { node: node, Link: reactRouterDom.Link, hideTryIt: hideTryIt, hideMocking: hideMocking, hideExport: hideExport, tryItCredentialsPolicy: tryItCredentialsPolicy, tryItCorsProxy: tryItCorsProxy }));
++  } else if (!node) {
++    elem = React__namespace.createElement(NotFound, null);
++  } else {
++    elem = React__namespace.createElement(NodeContent, {
++      node: node,
++      Link: reactRouterDom.Link,
++      hideTryIt: hideTryIt,
++      hideMocking: hideMocking,
++      hideExport: hideExport,
++      tryItCredentialsPolicy: tryItCredentialsPolicy,
++      tryItCorsProxy: tryItCorsProxy,
++    });
++  }
++  const handleTocClick = () => {
++    if (container.current) {
++      container.current.scrollIntoView();
+     }
+-    const handleTocClick = () => {
+-        if (container.current) {
+-            container.current.scrollIntoView();
+-        }
+-    };
+-    return (React__namespace.createElement(elementsCore.SidebarLayout, { ref: container, sidebar: React__namespace.createElement(React__namespace.Fragment, null,
+-            branches && branches.length > 1 ? (React__namespace.createElement(BranchSelector, { branchSlug: branchSlug, branches: branches, onChange: branch => history.push(branch.is_default ? `/${nodeSlug}` : `/branches/${branch.slug}/${nodeSlug}`) })) : null,
+-            tableOfContents ? (React__namespace.createElement(TableOfContents, { activeId: (node === null || node === void 0 ? void 0 : node.id) || (nodeSlug === null || nodeSlug === void 0 ? void 0 : nodeSlug.split('-')[0]) || '', tableOfContents: tableOfContents, Link: reactRouterDom.Link, collapseTableOfContents: collapseTableOfContents, onLinkClick: handleTocClick })) : null) }, elem));
++  };
++  return React__namespace.createElement(
++    elementsCore.SidebarLayout,
++    {
++      ref: container,
++      sidebar: React__namespace.createElement(
++        React__namespace.Fragment,
++        null,
++        branches && branches.length > 1
++          ? React__namespace.createElement(BranchSelector, {
++              branchSlug: branchSlug,
++              branches: branches,
++              onChange: (branch) =>
++                history.push(
++                  branch.is_default
++                    ? `/${nodeSlug}`
++                    : `/branches/${branch.slug}/${nodeSlug}`
++                ),
++            })
++          : null,
++        tableOfContents
++          ? React__namespace.createElement(TableOfContents, {
++              activeId:
++                (node === null || node === void 0 ? void 0 : node.id) ||
++                (nodeSlug === null || nodeSlug === void 0
++                  ? void 0
++                  : nodeSlug.split('-')[0]) ||
++                '',
++              tableOfContents: tableOfContents,
++              Link: reactRouterDom.Link,
++              collapseTableOfContents: collapseTableOfContents,
++              onLinkClick: handleTocClick,
++            })
++          : null
++      ),
++    },
++    elem
++  );
+ };
+ const StoplightProjectRouter = (_a) => {
+-    var { platformUrl, basePath = '/', router } = _a, props = __rest(_a, ["platformUrl", "basePath", "router"]);
+-    const { Router, routerProps } = elementsCore.useRouter(router !== null && router !== void 0 ? router : 'history', basePath);
+-    return (React__namespace.createElement(DevPortalProvider, { platformUrl: platformUrl },
+-        React__namespace.createElement(Router, Object.assign({}, routerProps, { key: basePath }),
+-            React__namespace.createElement(reactRouterDom.Route, { path: "/branches/:branchSlug/:nodeSlug", exact: true },
+-                React__namespace.createElement(StoplightProjectImpl, Object.assign({}, props))),
+-            React__namespace.createElement(reactRouterDom.Route, { path: "/:nodeSlug", exact: true },
+-                React__namespace.createElement(StoplightProjectImpl, Object.assign({}, props))),
+-            React__namespace.createElement(reactRouterDom.Route, { path: "/", exact: true },
+-                React__namespace.createElement(StoplightProjectImpl, Object.assign({}, props))))));
++  var { platformUrl, basePath = '/', router } = _a,
++    props = __rest(_a, ['platformUrl', 'basePath', 'router']);
++  const { Router, routerProps } = elementsCore.useRouter(
++    router !== null && router !== void 0 ? router : 'history',
++    basePath
++  );
++  return React__namespace.createElement(
++    DevPortalProvider,
++    { platformUrl: platformUrl },
++    React__namespace.createElement(
++      Router,
++      Object.assign({}, routerProps, { key: basePath }),
++      React__namespace.createElement(
++        reactRouterDom.Route,
++        { path: '/branches/:branchSlug/:nodeSlug', exact: true },
++        React__namespace.createElement(
++          StoplightProjectImpl,
++          Object.assign({}, props)
++        )
++      ),
++      React__namespace.createElement(
++        reactRouterDom.Route,
++        { path: '/:nodeSlug', exact: true },
++        React__namespace.createElement(
++          StoplightProjectImpl,
++          Object.assign({}, props)
++        )
++      ),
++      React__namespace.createElement(
++        reactRouterDom.Route,
++        { path: '/', exact: true },
++        React__namespace.createElement(
++          StoplightProjectImpl,
++          Object.assign({}, props)
++        )
++      )
++    )
++  );
+ };
+-const StoplightProject = fp.pipe(elementsCore.withStyles, elementsCore.withPersistenceBoundary, elementsCore.withMosaicProvider, elementsCore.withQueryClientProvider)(StoplightProjectRouter);
+-
+-const getNodes = ({ workspaceId, branchSlug, projectIds, search, platformUrl = 'https://stoplight.io', platformAuthToken, }) => __awaiter(void 0, void 0, void 0, function* () {
++const StoplightProject = fp.pipe(
++  elementsCore.withStyles,
++  elementsCore.withPersistenceBoundary,
++  elementsCore.withMosaicProvider,
++  elementsCore.withQueryClientProvider
++)(StoplightProjectRouter);
++
++const getNodes = ({
++  workspaceId,
++  branchSlug,
++  projectIds,
++  search,
++  platformUrl = 'https://stoplight.io',
++  platformAuthToken,
++}) =>
++  __awaiter(void 0, void 0, void 0, function* () {
+     const queryParams = [];
++    console.log(workspaceId);
+     let fetchedWorkspaceId = workspaceId || '';
+-    if (!workspaceId && (projectIds === null || projectIds === void 0 ? void 0 : projectIds.length)) {
+-        const response = yield fetch(`${platformUrl}/api/v1/projects/${projectIds[0]}`, {
+-            headers: Object.assign({ 'Stoplight-Elements-Version': appVersion }, (platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` })),
+-        });
+-        const data = yield response.json();
+-        fetchedWorkspaceId = data.workspace.id;
++    if (
++      !workspaceId &&
++      (projectIds === null || projectIds === void 0
++        ? void 0
++        : projectIds.length)
++    ) {
++      const response = yield fetch(
++        `${platformUrl}/api/v1/projects/${projectIds[0]}`,
++        {
++          headers: Object.assign(
++            { 'Stoplight-Elements-Version': appVersion },
++            platformAuthToken && {
++              Authorization: `Bearer ${platformAuthToken}`,
++            }
++          ),
++        }
++      );
++      const data = yield response.json();
++      fetchedWorkspaceId = data.workspace.id;
+     }
+     if (projectIds && projectIds.length) {
+-        queryParams.push(...projectIds.map((projectId, index) => `project_ids[${index}]=${projectId}`));
++      queryParams.push(
++        ...projectIds.map(
++          (projectId, index) => `project_ids[${index}]=${projectId}`
++        )
++      );
+     }
+     if (search) {
+-        queryParams.push(`search=${search}`);
++      queryParams.push(`search=${search}`);
+     }
+     if (branchSlug) {
+-        queryParams.push(`branchSlug=${branchSlug}`);
++      queryParams.push(`branchSlug=${branchSlug}`);
+     }
+     const query = queryParams.length ? `?${queryParams.join('&')}` : '';
+-    const response = yield fetch(`${platformUrl}/api/v1/workspaces/${fetchedWorkspaceId}/nodes${query}`, {
+-        headers: Object.assign({ 'Stoplight-Elements-Version': appVersion }, (platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` })),
+-    });
++    const response = yield fetch(
++      `${platformUrl}/api/v1/workspaces/${fetchedWorkspaceId}/nodes${query}`,
++      {
++        headers: Object.assign(
++          { 'Stoplight-Elements-Version': appVersion },
++          platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` }
++        ),
++      }
++    );
+     const data = yield response.json();
+     if (!response.ok) {
+-        throw new Error(data);
++      throw new Error(data);
+     }
+     return data;
+-});
+-
+-const getWorkspace = ({ projectIds, platformUrl = 'https://stoplight.io', platformAuthToken, }) => __awaiter(void 0, void 0, void 0, function* () {
+-    const response = yield fetch(`${platformUrl}/api/v1/projects/${projectIds[0]}`, {
+-        headers: Object.assign({ 'Stoplight-Elements-Version': appVersion }, (platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` })),
+-    });
++  });
++
++const getWorkspace = ({
++  projectIds,
++  platformUrl = 'https://stoplight.io',
++  platformAuthToken,
++}) =>
++  __awaiter(void 0, void 0, void 0, function* () {
++    const response = yield fetch(
++      `${platformUrl}/api/v1/projects/${projectIds[0]}`,
++      {
++        headers: Object.assign(
++          { 'Stoplight-Elements-Version': appVersion },
++          platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` }
++        ),
++      }
++    );
+     const data = yield response.json();
+     if (!response.ok) {
+-        throw new Error(data);
++      throw new Error(data);
+     }
+     return data;
+-});
+-
+-function useGetNodes({ search, workspaceId, branchSlug, projectIds, pause, }) {
+-    const { platformUrl, platformAuthToken } = React__namespace.useContext(PlatformContext);
+-    const [debounceSearch] = useDebounce.useDebounce(search, 500);
+-    return reactQuery.useQuery(['workspaceNodes', workspaceId, branchSlug, projectIds, debounceSearch, platformUrl, platformAuthToken], () => getNodes({ workspaceId, branchSlug, projectIds, search: debounceSearch, platformUrl, platformAuthToken }), { enabled: !pause });
++  });
++
++function useGetNodes({ search, workspaceId, branchSlug, projectIds, pause }) {
++  const { platformUrl, platformAuthToken } = React__namespace.useContext(
++    PlatformContext
++  );
++  const [debounceSearch] = useDebounce.useDebounce(search, 500);
++  return reactQuery.useQuery(
++    [
++      'workspaceNodes',
++      workspaceId,
++      branchSlug,
++      projectIds,
++      debounceSearch,
++      platformUrl,
++      platformAuthToken,
++    ],
++    () =>
++      getNodes({
++        workspaceId,
++        branchSlug,
++        projectIds,
++        search: debounceSearch,
++        platformUrl,
++        platformAuthToken,
++      }),
++    { enabled: !pause }
++  );
+ }
+ 
+ function useGetWorkspace({ projectIds }) {
+-    const { platformUrl, platformAuthToken } = React__namespace.useContext(PlatformContext);
+-    return reactQuery.useQuery(['useWorkspace', projectIds, platformUrl, platformAuthToken], () => getWorkspace({ projectIds, platformUrl, platformAuthToken }));
++  const { platformUrl, platformAuthToken } = React__namespace.useContext(
++    PlatformContext
++  );
++  return reactQuery.useQuery(
++    ['useWorkspace', projectIds, platformUrl, platformAuthToken],
++    () => getWorkspace({ projectIds, platformUrl, platformAuthToken })
++  );
+ }
+ 
+ exports.BranchSelector = BranchSelector;
+diff --git a/node_modules/@stoplight/elements-dev-portal/index.mjs b/node_modules/@stoplight/elements-dev-portal/index.mjs
+index 14d5178..3c87cfa 100644
+--- a/node_modules/@stoplight/elements-dev-portal/index.mjs
++++ b/node_modules/@stoplight/elements-dev-portal/index.mjs
+@@ -1,125 +1,350 @@
+-import { Menu, FieldButton, Provider, Modal, Input, Box, Icon, ListBox, ListBoxItem, Flex, VStack, Heading } from '@stoplight/mosaic';
++import {
++  Menu,
++  FieldButton,
++  Provider,
++  Modal,
++  Input,
++  Box,
++  Icon,
++  ListBox,
++  ListBoxItem,
++  Flex,
++  VStack,
++  Heading,
++  isNumeric,
++} from '@stoplight/mosaic';
+ import * as React from 'react';
+ import React__default from 'react';
+-import { withQueryClientProvider, PersistenceContextProvider, MarkdownComponentsProvider, MockingProvider, Docs, withStyles, withPersistenceBoundary, withMosaicProvider, NodeTypeIconDefs, NodeTypeColors, TableOfContents as TableOfContents$1, PoweredByLink, useRouter, findFirstNode, SidebarLayout } from '@stoplight/elements-core';
++import {
++  withQueryClientProvider,
++  PersistenceContextProvider,
++  MarkdownComponentsProvider,
++  MockingProvider,
++  Docs,
++  withStyles,
++  withPersistenceBoundary,
++  withMosaicProvider,
++  NodeTypeIconDefs,
++  NodeTypeColors,
++  TableOfContents as TableOfContents$1,
++  PoweredByLink,
++  useRouter,
++  findFirstNode,
++  SidebarLayout,
++} from '@stoplight/elements-core';
+ import { resolve, dirname } from '@stoplight/path';
+ import { NodeType } from '@stoplight/types';
+ import { faSearch } from '@fortawesome/free-solid-svg-icons/faSearch';
+ import { pipe } from 'lodash/fp';
+ import { Route, useParams, useHistory, Redirect, Link } from 'react-router-dom';
+-import { faCircleNotch, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
++import {
++  faCircleNotch,
++  faExclamationTriangle,
++} from '@fortawesome/free-solid-svg-icons';
+ import { useQuery } from 'react-query';
+ import { useDebounce } from 'use-debounce';
+ 
+ const BranchSelector = ({ branchSlug, branches, onChange }) => {
+-    const currentBranch = branches.find(branch => (!branchSlug ? branch.is_default : branch.slug === branchSlug));
+-    const handleChange = React.useCallback((selectedSlug) => {
+-        const selectedBranch = branches.find(branch => branch.slug === selectedSlug);
+-        if (selectedBranch) {
+-            onChange(selectedBranch);
+-        }
+-    }, [onChange, branches]);
+-    return (React.createElement(Menu, { "aria-label": "Versions", placement: "bottom left", closeOnPress: true, matchTriggerWidth: true, renderTrigger: ({ isOpen }) => (React.createElement(FieldButton, { w: "full", icon: "layer-group", px: 4, h: "md", active: isOpen, borderR: 0, roundedR: "none" }, (currentBranch === null || currentBranch === void 0 ? void 0 : currentBranch.name) || (currentBranch === null || currentBranch === void 0 ? void 0 : currentBranch.slug) || 'Choose a version')), items: [
+-            {
+-                type: 'option_group',
+-                title: 'Versions',
+-                onChange: handleChange,
+-                value: (currentBranch === null || currentBranch === void 0 ? void 0 : currentBranch.slug) || '',
+-                children: branches.map(branch => ({
+-                    label: branch.name || branch.slug,
+-                    value: branch.slug,
+-                    meta: branch.is_default ? 'Default' : undefined,
+-                })),
+-            },
+-        ] }));
++  const currentBranch = branches.find((branch) =>
++    !branchSlug ? branch.is_default : branch.slug === branchSlug
++  );
++  const handleChange = React.useCallback(
++    (selectedSlug) => {
++      const selectedBranch = branches.find(
++        (branch) => branch.slug === selectedSlug
++      );
++      if (selectedBranch) {
++        onChange(selectedBranch);
++      }
++    },
++    [onChange, branches]
++  );
++  return React.createElement(Menu, {
++    'aria-label': 'Versions',
++    placement: 'bottom left',
++    closeOnPress: true,
++    matchTriggerWidth: true,
++    renderTrigger: ({ isOpen }) =>
++      React.createElement(
++        FieldButton,
++        {
++          w: 'full',
++          icon: 'layer-group',
++          px: 4,
++          h: 'md',
++          active: isOpen,
++          borderR: 0,
++          roundedR: 'none',
++        },
++        (currentBranch === null || currentBranch === void 0
++          ? void 0
++          : currentBranch.name) ||
++          (currentBranch === null || currentBranch === void 0
++            ? void 0
++            : currentBranch.slug) ||
++          'Choose a version'
++      ),
++    items: [
++      {
++        type: 'option_group',
++        title: 'Versions',
++        onChange: handleChange,
++        value:
++          (currentBranch === null || currentBranch === void 0
++            ? void 0
++            : currentBranch.slug) || '',
++        children: branches.map((branch) => ({
++          label: branch.name || branch.slug,
++          value: branch.slug,
++          meta: branch.is_default ? 'Default' : undefined,
++        })),
++      },
++    ],
++  });
+ };
+ 
+-const PlatformContext = React.createContext({ platformUrl: 'https://stoplight.io' });
+-const PlatformProvider = ({ platformUrl = 'https://stoplight.io', platformAuthToken, children, }) => {
+-    return (React.createElement(PlatformContext.Provider, { value: { platformUrl, platformAuthToken } },
+-        React.createElement(Provider, null, children)));
++const PlatformContext = React.createContext({
++  platformUrl: 'https://stoplight.io',
++});
++const PlatformProvider = ({
++  platformUrl = 'https://stoplight.io',
++  platformAuthToken,
++  children,
++}) => {
++  return React.createElement(
++    PlatformContext.Provider,
++    { value: { platformUrl, platformAuthToken } },
++    React.createElement(Provider, null, children)
++  );
+ };
+ const DevPortalProvider = withQueryClientProvider(PlatformProvider);
+ 
+-const NodeContent = ({ node, Link, hideTryIt, hideTryItPanel, hideMocking, hideExport, tryItCredentialsPolicy, tryItCorsProxy, }) => {
+-    return (React.createElement(PersistenceContextProvider, null,
+-        React.createElement(NodeLinkContext.Provider, { value: [node, Link] },
+-            React.createElement(MarkdownComponentsProvider, { value: { a: LinkComponent } },
+-                React.createElement(MockingProvider, { mockUrl: node.links.mock_url, hideMocking: hideMocking },
+-                    React.createElement(Docs, { nodeType: node.type, nodeData: node.data, nodeTitle: node.title, layoutOptions: {
+-                            hideTryIt: hideTryIt,
+-                            hideTryItPanel: hideTryItPanel,
+-                            hideExport: hideExport || node.links.export_url === undefined,
+-                        }, useNodeForRefResolving: true, tryItCorsProxy: tryItCorsProxy, exportProps: [NodeType.HttpService, NodeType.Model].includes(node.type)
+-                            ? {
+-                                original: {
+-                                    href: node.links.export_url,
+-                                },
+-                                bundled: {
+-                                    href: getBundledUrl(node.links.export_url),
+-                                },
+-                            }
+-                            : undefined, tryItCredentialsPolicy: tryItCredentialsPolicy }))))));
++const NodeContent = ({
++  node,
++  Link,
++  hideTryIt,
++  hideTryItPanel,
++  hideMocking,
++  hideExport,
++  tryItCredentialsPolicy,
++  tryItCorsProxy,
++}) => {
++  return React.createElement(
++    PersistenceContextProvider,
++    null,
++    React.createElement(
++      NodeLinkContext.Provider,
++      { value: [node, Link] },
++      React.createElement(
++        MarkdownComponentsProvider,
++        { value: { a: LinkComponent } },
++        React.createElement(
++          MockingProvider,
++          { mockUrl: node.links.mock_url, hideMocking: hideMocking },
++          React.createElement(Docs, {
++            nodeType: node.type,
++            nodeData: node.data,
++            nodeTitle: node.title,
++            layoutOptions: {
++              hideTryIt: hideTryIt,
++              hideTryItPanel: hideTryItPanel,
++              hideExport: hideExport || node.links.export_url === undefined,
++            },
++            useNodeForRefResolving: true,
++            tryItCorsProxy: tryItCorsProxy,
++            exportProps: [NodeType.HttpService, NodeType.Model].includes(
++              node.type
++            )
++              ? {
++                  original: {
++                    href: node.links.export_url,
++                  },
++                  bundled: {
++                    href: getBundledUrl(node.links.export_url),
++                  },
++                }
++              : undefined,
++            tryItCredentialsPolicy: tryItCredentialsPolicy,
++          })
++        )
++      )
++    )
++  );
+ };
+ const NodeLinkContext = React.createContext(undefined);
+ const externalRegex = new RegExp('^(?:[a-z]+:)?//', 'i');
+ const LinkComponent = ({ children, href }) => {
+-    const ctx = React.useContext(NodeLinkContext);
+-    if (href && externalRegex.test(href)) {
+-        return (React.createElement("a", { href: href, target: "_blank", rel: "noreferrer" }, children));
++  const ctx = React.useContext(NodeLinkContext);
++  if (href && externalRegex.test(href)) {
++    return React.createElement(
++      'a',
++      { href: href, target: '_blank', rel: 'noreferrer' },
++      children
++    );
++  }
++  if (href && ctx) {
++    const [node, Link] = ctx;
++    const resolvedUri = resolve(dirname(node.uri), href);
++    const [resolvedUriWithoutAnchor, hash] = resolvedUri.split('#');
++    const decodedUrl = decodeURIComponent(href);
++    const decodedResolvedUriWithoutAnchor = decodeURIComponent(
++      resolvedUriWithoutAnchor
++    );
++    const edge = node.outbound_edges.find(
++      (edge) =>
++        edge.uri === decodedUrl || edge.uri === decodedResolvedUriWithoutAnchor
++    );
++    if (edge) {
++      return React.createElement(Link, { to: edge.slug, hash: hash }, children);
+     }
+-    if (href && ctx) {
+-        const [node, Link] = ctx;
+-        const resolvedUri = resolve(dirname(node.uri), href);
+-        const [resolvedUriWithoutAnchor, hash] = resolvedUri.split('#');
+-        const decodedUrl = decodeURIComponent(href);
+-        const decodedResolvedUriWithoutAnchor = decodeURIComponent(resolvedUriWithoutAnchor);
+-        const edge = node.outbound_edges.find(edge => edge.uri === decodedUrl || edge.uri === decodedResolvedUriWithoutAnchor);
+-        if (edge) {
+-            return (React.createElement(Link, { to: edge.slug, hash: hash }, children));
+-        }
+-    }
+-    return React.createElement("a", { href: href }, children);
++  }
++  return React.createElement('a', { href: href }, children);
+ };
+ function getBundledUrl(url) {
+-    if (url === undefined)
+-        return undefined;
+-    const bundledUrl = new URL(url);
+-    const searchParams = new URLSearchParams(bundledUrl.search);
+-    searchParams.append('deref', 'optimizedBundle');
+-    bundledUrl.search = searchParams.toString();
+-    return bundledUrl.toString();
++  if (url === undefined) return undefined;
++  const bundledUrl = new URL(url);
++  const searchParams = new URLSearchParams(bundledUrl.search);
++  searchParams.append('deref', 'optimizedBundle');
++  bundledUrl.search = searchParams.toString();
++  return bundledUrl.toString();
+ }
+ 
+-const SearchImpl = ({ search, searchResults, isOpen, onClose, onClick, onSearch }) => {
+-    const listBoxRef = React.useRef(null);
+-    const onChange = React.useCallback(e => onSearch(e.currentTarget.value), [onSearch]);
+-    const onKeyDown = React.useCallback(e => {
+-        var _a;
+-        if (e.key === 'ArrowDown') {
+-            e.preventDefault();
+-            (_a = listBoxRef.current) === null || _a === void 0 ? void 0 : _a.focus();
+-        }
+-    }, []);
+-    const onSelectionChange = React.useCallback(keys => {
+-        const selectedId = keys.values().next().value;
+-        const selectedResult = searchResults === null || searchResults === void 0 ? void 0 : searchResults.find(searchResult => `${searchResult.id}-${searchResult.project_id}` === selectedId);
+-        if (selectedResult) {
+-            onClick(selectedResult);
+-        }
+-    }, [searchResults, onClick]);
+-    return (React.createElement(Modal, { renderHeader: () => (React.createElement(Input, { appearance: "minimal", borderB: true, size: "lg", icon: React.createElement(Box, { as: Icon, ml: 1, icon: faSearch }), autoFocus: true, placeholder: "Search...", value: search, onChange: onChange, onKeyDown: onKeyDown })), isOpen: !!isOpen, onClose: onClose }, searchResults && searchResults.length > 0 ? (React.createElement(ListBox, { ref: listBoxRef, "aria-label": "Search", overflowY: "auto", h: 80, m: -5, items: searchResults, selectionMode: "single", onSelectionChange: onSelectionChange }, (searchResult) => {
+-        var _a, _b;
+-        return (React.createElement(ListBoxItem, { key: `${searchResult.id}-${searchResult.project_id}`, textValue: searchResult.title },
+-            React.createElement(Box, { p: 3, borderB: true },
+-                React.createElement(Flex, { align: "center" },
+-                    React.createElement(Box, { as: Icon, w: 4, icon: NodeTypeIconDefs[searchResult.type], style: { color: NodeTypeColors[searchResult.type] } }),
+-                    React.createElement(Box, { flex: 1, fontSize: "lg", dangerouslySetInnerHTML: { __html: (_a = searchResult.highlighted.name) !== null && _a !== void 0 ? _a : '' }, fontWeight: "medium", textOverflow: "overflow-ellipsis", mx: 2 }),
+-                    React.createElement(Box, { fontSize: "sm", color: "muted" }, searchResult.project_name)),
+-                React.createElement(Box, { dangerouslySetInnerHTML: { __html: (_b = searchResult.highlighted.summary) !== null && _b !== void 0 ? _b : '' }, color: "muted", fontSize: "sm", mt: 1, ml: 6 }))));
+-    })) : (React.createElement(Flex, { w: "full", h: 80, align: "center", justify: "center", m: -5 }, "No search results"))));
++const SearchImpl = ({
++  search,
++  searchResults,
++  isOpen,
++  onClose,
++  onClick,
++  onSearch,
++}) => {
++  const listBoxRef = React.useRef(null);
++  const onChange = React.useCallback((e) => onSearch(e.currentTarget.value), [
++    onSearch,
++  ]);
++  const onKeyDown = React.useCallback((e) => {
++    var _a;
++    if (e.key === 'ArrowDown') {
++      e.preventDefault();
++      (_a = listBoxRef.current) === null || _a === void 0 ? void 0 : _a.focus();
++    }
++  }, []);
++  const onSelectionChange = React.useCallback(
++    (keys) => {
++      const selectedId = keys.values().next().value;
++      const selectedResult =
++        searchResults === null || searchResults === void 0
++          ? void 0
++          : searchResults.find(
++              (searchResult) =>
++                `${searchResult.id}-${searchResult.project_id}` === selectedId
++            );
++      if (selectedResult) {
++        onClick(selectedResult);
++      }
++    },
++    [searchResults, onClick]
++  );
++  return React.createElement(
++    Modal,
++    {
++      renderHeader: () =>
++        React.createElement(Input, {
++          appearance: 'minimal',
++          borderB: true,
++          size: 'lg',
++          icon: React.createElement(Box, { as: Icon, ml: 1, icon: faSearch }),
++          autoFocus: true,
++          placeholder: 'Search...',
++          value: search,
++          onChange: onChange,
++          onKeyDown: onKeyDown,
++        }),
++      isOpen: !!isOpen,
++      onClose: onClose,
++    },
++    searchResults && searchResults.length > 0
++      ? React.createElement(
++          ListBox,
++          {
++            ref: listBoxRef,
++            'aria-label': 'Search',
++            overflowY: 'auto',
++            h: 80,
++            m: -5,
++            items: searchResults,
++            selectionMode: 'single',
++            onSelectionChange: onSelectionChange,
++          },
++          (searchResult) => {
++            var _a, _b;
++            return React.createElement(
++              ListBoxItem,
++              {
++                key: `${searchResult.id}-${searchResult.project_id}`,
++                textValue: searchResult.title,
++              },
++              React.createElement(
++                Box,
++                { p: 3, borderB: true },
++                React.createElement(
++                  Flex,
++                  { align: 'center' },
++                  React.createElement(Box, {
++                    as: Icon,
++                    w: 4,
++                    icon: NodeTypeIconDefs[searchResult.type],
++                    style: { color: NodeTypeColors[searchResult.type] },
++                  }),
++                  React.createElement(Box, {
++                    flex: 1,
++                    fontSize: 'lg',
++                    dangerouslySetInnerHTML: {
++                      __html:
++                        (_a = searchResult.highlighted.name) !== null &&
++                        _a !== void 0
++                          ? _a
++                          : '',
++                    },
++                    fontWeight: 'medium',
++                    textOverflow: 'overflow-ellipsis',
++                    mx: 2,
++                  }),
++                  React.createElement(
++                    Box,
++                    { fontSize: 'sm', color: 'muted' },
++                    searchResult.project_name
++                  )
++                ),
++                React.createElement(Box, {
++                  dangerouslySetInnerHTML: {
++                    __html:
++                      (_b = searchResult.highlighted.summary) !== null &&
++                      _b !== void 0
++                        ? _b
++                        : '',
++                  },
++                  color: 'muted',
++                  fontSize: 'sm',
++                  mt: 1,
++                  ml: 6,
++                })
++              )
++            );
++          }
++        )
++      : React.createElement(
++          Flex,
++          { w: 'full', h: 80, align: 'center', justify: 'center', m: -5 },
++          'No search results'
++        )
++  );
+ };
+-const Search = pipe(withStyles, withPersistenceBoundary, withMosaicProvider, withQueryClientProvider)(SearchImpl);
++const Search = pipe(
++  withStyles,
++  withPersistenceBoundary,
++  withMosaicProvider,
++  withQueryClientProvider
++)(SearchImpl);
+ 
+ /*! *****************************************************************************
+ Copyright (c) Microsoft Corporation.
+@@ -137,241 +362,616 @@ PERFORMANCE OF THIS SOFTWARE.
+ ***************************************************************************** */
+ 
+ function __rest(s, e) {
+-    var t = {};
+-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+-        t[p] = s[p];
+-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+-                t[p[i]] = s[p[i]];
+-        }
+-    return t;
++  var t = {};
++  for (var p in s)
++    if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
++      t[p] = s[p];
++  if (s != null && typeof Object.getOwnPropertySymbols === 'function')
++    for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
++      if (
++        e.indexOf(p[i]) < 0 &&
++        Object.prototype.propertyIsEnumerable.call(s, p[i])
++      )
++        t[p[i]] = s[p[i]];
++    }
++  return t;
+ }
+ 
+ function __awaiter(thisArg, _arguments, P, generator) {
+-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+-    return new (P || (P = Promise))(function (resolve, reject) {
+-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+-        step((generator = generator.apply(thisArg, _arguments || [])).next());
+-    });
++  function adopt(value) {
++    return value instanceof P
++      ? value
++      : new P(function (resolve) {
++          resolve(value);
++        });
++  }
++  return new (P || (P = Promise))(function (resolve, reject) {
++    function fulfilled(value) {
++      try {
++        step(generator.next(value));
++      } catch (e) {
++        reject(e);
++      }
++    }
++    function rejected(value) {
++      try {
++        step(generator['throw'](value));
++      } catch (e) {
++        reject(e);
++      }
++    }
++    function step(result) {
++      result.done
++        ? resolve(result.value)
++        : adopt(result.value).then(fulfilled, rejected);
++    }
++    step((generator = generator.apply(thisArg, _arguments || [])).next());
++  });
+ }
+ 
++const filterToc = (toc, page) => {
++  if (page == 'Guides') {
++    return toc.filter((x) => x.title == 'apps');
++  } else if (page == 'Concepts') {
++    return toc.filter((x) => x.title == 'getting-started');
++  } else return toc;
++};
++
+ const TableOfContents = (_a) => {
+-    var { tableOfContents, activeId, Link, collapseTableOfContents = false, externalScrollbar, onLinkClick } = _a, boxProps = __rest(_a, ["tableOfContents", "activeId", "Link", "collapseTableOfContents", "externalScrollbar", "onLinkClick"]);
+-    return (React.createElement(Flex, Object.assign({ bg: "canvas-100" }, boxProps, { flexDirection: "col", maxH: "full" }),
+-        React.createElement(Flex, { flexGrow: true, flexShrink: true, overflowY: "auto" },
+-            React.createElement(TableOfContents$1, { tree: tableOfContents.items, activeId: activeId, Link: Link, maxDepthOpenByDefault: collapseTableOfContents ? 0 : 1, externalScrollbar: externalScrollbar, onLinkClick: onLinkClick })),
+-        tableOfContents.hide_powered_by ? null : (React.createElement(PoweredByLink, { source: activeId, pathname: typeof window !== 'undefined' ? window.location.pathname : '', packageType: "elements-dev-portal" }))));
++  console.log(_a);
++  var {
++      tableOfContents,
++      activeId,
++      Link,
++      collapseTableOfContents = false,
++      externalScrollbar,
++      onLinkClick,
++      page,
++    } = _a,
++    boxProps = __rest(_a, [
++      'tableOfContents',
++      'activeId',
++      'Link',
++      'collapseTableOfContents',
++      'externalScrollbar',
++      'onLinkClick',
++    ]);
++  return React.createElement(
++    Flex,
++    Object.assign({ bg: 'canvas-100' }, boxProps, {
++      flexDirection: 'col',
++      maxH: 'full',
++    }),
++    React.createElement(
++      Flex,
++      { flexGrow: true, flexShrink: true, overflowY: 'auto' },
++      React.createElement(TableOfContents$1, {
++        tree: filterToc(tableOfContents.items, page),
++        activeId: activeId,
++        Link: Link,
++        maxDepthOpenByDefault: collapseTableOfContents ? 0 : 1,
++        externalScrollbar: externalScrollbar,
++        onLinkClick: onLinkClick,
++      })
++    ),
++    tableOfContents.hide_powered_by ? null : null
++    //   React.createElement(PoweredByLink, {
++    //       source: activeId,
++    //       pathname:
++    //         typeof window !== 'undefined' ? window.location.pathname : '',
++    //       packageType: 'elements-dev-portal',
++    //     })
++  );
+ };
+ 
+-const Forbidden = () => (React__default.createElement(Flex, { align: "center", justify: "center", flexGrow: true },
+-    React__default.createElement(VStack, { spacing: 4, align: "center" },
+-        React__default.createElement(Heading, { size: 1 }, "Forbidden"),
+-        React__default.createElement(Box, { as: "p" }, "You don't have permission to access this resource"))));
++const Forbidden = () =>
++  React__default.createElement(
++    Flex,
++    { align: 'center', justify: 'center', flexGrow: true },
++    React__default.createElement(
++      VStack,
++      { spacing: 4, align: 'center' },
++      React__default.createElement(Heading, { size: 1 }, 'Forbidden'),
++      React__default.createElement(
++        Box,
++        { as: 'p' },
++        "You don't have permission to access this resource"
++      )
++    )
++  );
+ 
+-const Loading = () => (React__default.createElement(Flex, { justify: "center", alignItems: "center", w: "full", minH: "screen", color: "muted" },
+-    React__default.createElement(Icon, { icon: faCircleNotch, size: "3x", spin: true })));
++const Loading = () =>
++  React__default.createElement(
++    Flex,
++    {
++      justify: 'center',
++      alignItems: 'center',
++      w: 'full',
++      minH: 'screen',
++      color: 'muted',
++    },
++    React__default.createElement(Icon, {
++      icon: faCircleNotch,
++      size: '3x',
++      spin: true,
++    })
++  );
+ 
+-const NotFound = () => (React__default.createElement(Flex, { align: "center", justify: "center", flexGrow: true },
+-    React__default.createElement(VStack, { spacing: 4, align: "center" },
+-        React__default.createElement(Heading, { size: 1 }, "Not Found"),
+-        React__default.createElement(Box, { as: "p" }, "Could not find what you are looking for"))));
++const NotFound = () =>
++  React__default.createElement(
++    Flex,
++    { align: 'center', justify: 'center', flexGrow: true },
++    React__default.createElement(
++      VStack,
++      { spacing: 4, align: 'center' },
++      React__default.createElement(Heading, { size: 1 }, 'Not Found'),
++      React__default.createElement(
++        Box,
++        { as: 'p' },
++        'Could not find what you are looking for'
++      )
++    )
++  );
+ 
+-const UpgradeToStarter = () => (React__default.createElement(Flex, { as: "a", href: "https://stoplight.io/pricing/", target: "_blank", rel: "noreferrer noopener", justify: "center", alignItems: "center", w: "full", minH: "screen", color: "muted", flexDirection: "col" },
+-    React__default.createElement(Icon, { icon: faExclamationTriangle, size: "4x" }),
+-    React__default.createElement(Box, { pt: 3 }, "Please upgrade your Stoplight Workspace to the Starter Plan to use Elements Dev Portal in production.")));
++const UpgradeToStarter = () =>
++  React__default.createElement(
++    Flex,
++    {
++      as: 'a',
++      href: 'https://stoplight.io/pricing/',
++      target: '_blank',
++      rel: 'noreferrer noopener',
++      justify: 'center',
++      alignItems: 'center',
++      w: 'full',
++      minH: 'screen',
++      color: 'muted',
++      flexDirection: 'col',
++    },
++    React__default.createElement(Icon, {
++      icon: faExclamationTriangle,
++      size: '4x',
++    }),
++    React__default.createElement(
++      Box,
++      { pt: 3 },
++      'Please upgrade your Stoplight Workspace to the Starter Plan to use Elements Dev Portal in production.'
++    )
++  );
+ 
+ const appVersion = '1.4.3';
+ 
+ class ResponseError extends Error {
+-    constructor(message, responseCode) {
+-        super(message);
+-        this.name = 'ResponseError';
+-        this.code = responseCode;
+-    }
++  constructor(message, responseCode) {
++    super(message);
++    this.name = 'ResponseError';
++    this.code = responseCode;
++  }
+ }
+-const getNodeContent = ({ nodeSlug, projectId, branchSlug, platformUrl = 'https://stoplight.io', platformAuthToken, }) => __awaiter(void 0, void 0, void 0, function* () {
++const getNodeContent = ({
++  nodeSlug,
++  projectId,
++  branchSlug,
++  platformUrl = 'https://stoplight.io',
++  platformAuthToken,
++}) =>
++  __awaiter(void 0, void 0, void 0, function* () {
+     const nodeId = getNodeIdFromSlug(nodeSlug);
+     const branchQuery = branchSlug ? `?branch=${branchSlug}` : '';
+-    const response = yield fetch(`${platformUrl}/api/v1/projects/${projectId}/nodes/${nodeId}${branchQuery}`, {
+-        headers: Object.assign({ 'Stoplight-Elements-Version': appVersion }, (platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` })),
+-    });
++    const response = yield fetch(
++      `${platformUrl}/api/v1/projects/${projectId}/nodes/${nodeId}${branchQuery}`,
++      {
++        headers: Object.assign(
++          { 'Stoplight-Elements-Version': appVersion },
++          platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` }
++        ),
++      }
++    );
+     const data = yield response.json();
+     if (!response.ok) {
+-        if (response.status === 402) {
+-            throw new ResponseError('Payment Required', response.status);
+-        }
+-        else if (response.status === 403) {
+-            throw new ResponseError('Forbidden', response.status);
+-        }
+-        else {
+-            throw new ResponseError('Something went wrong', response.status);
+-        }
++      if (response.status === 402) {
++        throw new ResponseError('Payment Required', response.status);
++      } else if (response.status === 403) {
++        throw new ResponseError('Forbidden', response.status);
++      } else {
++        throw new ResponseError('Something went wrong', response.status);
++      }
+     }
+     return data;
+-});
++  });
+ function getNodeIdFromSlug(nodeSlug) {
+-    return nodeSlug.split('-')[0];
++  return nodeSlug.split('-')[0];
+ }
+ 
+-const getBranches = ({ projectId, platformUrl = 'https://stoplight.io', platformAuthToken, }) => __awaiter(void 0, void 0, void 0, function* () {
+-    const response = yield fetch(`${platformUrl}/api/v1/projects/${projectId}/branches`, {
+-        headers: Object.assign({ 'Stoplight-Elements-Version': appVersion }, (platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` })),
+-    });
++const getBranches = ({
++  projectId,
++  platformUrl = 'https://stoplight.io',
++  platformAuthToken,
++}) =>
++  __awaiter(void 0, void 0, void 0, function* () {
++    const response = yield fetch(
++      `${platformUrl}/api/v1/projects/${projectId}/branches`,
++      {
++        headers: Object.assign(
++          { 'Stoplight-Elements-Version': appVersion },
++          platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` }
++        ),
++      }
++    );
+     const data = yield response.json();
+     if (!response.ok) {
+-        throw new Error(data);
++      throw new Error(data);
+     }
+     return data;
+-});
++  });
+ 
+ function useGetBranches({ projectId }) {
+-    const { platformUrl, platformAuthToken } = React.useContext(PlatformContext);
+-    return useQuery(['branches', projectId, platformUrl, platformAuthToken], () => getBranches({ projectId, platformUrl, platformAuthToken }), {
+-        enabled: projectId ? true : false,
+-    });
++  const { platformUrl, platformAuthToken } = React.useContext(PlatformContext);
++  return useQuery(
++    ['branches', projectId, platformUrl, platformAuthToken],
++    () => getBranches({ projectId, platformUrl, platformAuthToken }),
++    {
++      enabled: projectId ? true : false,
++    }
++  );
+ }
+ 
+-function useGetNodeContent({ nodeSlug, projectId, branchSlug, }) {
+-    const { platformUrl, platformAuthToken } = React.useContext(PlatformContext);
+-    return useQuery(['useNodeContent', nodeSlug, projectId, branchSlug, platformUrl, platformAuthToken], () => getNodeContent({ nodeSlug, projectId, branchSlug, platformUrl, platformAuthToken }), { enabled: nodeSlug && projectId ? true : false });
++function useGetNodeContent({ nodeSlug, projectId, branchSlug }) {
++  const { platformUrl, platformAuthToken } = React.useContext(PlatformContext);
++  return useQuery(
++    [
++      'useNodeContent',
++      nodeSlug,
++      projectId,
++      branchSlug,
++      platformUrl,
++      platformAuthToken,
++    ],
++    () =>
++      getNodeContent({
++        nodeSlug,
++        projectId,
++        branchSlug,
++        platformUrl,
++        platformAuthToken,
++      }),
++    { enabled: nodeSlug && projectId ? true : false }
++  );
+ }
+ 
+-const getTableOfContents = ({ projectId, branchSlug, platformUrl = 'https://stoplight.io', platformAuthToken, }) => __awaiter(void 0, void 0, void 0, function* () {
++const getTableOfContents = ({
++  projectId,
++  branchSlug,
++  platformUrl = 'https://stoplight.io',
++  platformAuthToken,
++  page,
++}) =>
++  __awaiter(void 0, void 0, void 0, function* () {
+     const branchQuery = branchSlug ? `?branch=${branchSlug}` : '';
+-    const response = yield fetch(`${platformUrl}/api/v1/projects/${projectId}/table-of-contents${branchQuery}`, {
+-        headers: Object.assign({ 'Stoplight-Elements-Version': appVersion }, (platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` })),
+-    });
++    const response = yield fetch(
++      `${platformUrl}/api/v1/projects/${projectId}/table-of-contents${branchQuery}`,
++      {
++        headers: Object.assign(
++          { 'Stoplight-Elements-Version': appVersion },
++          platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` }
++        ),
++      }
++    );
++    console.log(response);
++
+     const data = yield response.json();
++    console.log(data);
+     if (!response.ok) {
+-        throw new Error(data);
++      throw new Error(data);
+     }
+     return data;
+-});
++  });
+ 
+-function useGetTableOfContents({ projectId, branchSlug }) {
+-    const { platformUrl, platformAuthToken } = React.useContext(PlatformContext);
+-    return useQuery(['tableOfContents', projectId, branchSlug, platformUrl, platformAuthToken], () => getTableOfContents({ projectId, branchSlug, platformUrl, platformAuthToken }), { enabled: projectId ? true : false });
+-}
+-
+-const StoplightProjectImpl = ({ projectId, hideTryIt, hideMocking, hideExport, collapseTableOfContents = false, tryItCredentialsPolicy, tryItCorsProxy, }) => {
+-    const { branchSlug = '', nodeSlug = '' } = useParams();
+-    const history = useHistory();
+-    const { data: tableOfContents, isFetched: isTocFetched } = useGetTableOfContents({ projectId, branchSlug });
+-    const { data: branches } = useGetBranches({ projectId });
+-    const { data: node, isLoading: isLoadingNode, isError, error: nodeError, } = useGetNodeContent({
+-        nodeSlug,
++function useGetTableOfContents({ projectId, branchSlug, page }) {
++  const { platformUrl, platformAuthToken } = React.useContext(PlatformContext);
++  return useQuery(
++    ['tableOfContents', projectId, branchSlug, platformUrl, platformAuthToken],
++    () =>
++      getTableOfContents({
+         projectId,
+         branchSlug,
+-    });
+-    const container = React.useRef(null);
+-    if (!nodeSlug && isTocFetched && (tableOfContents === null || tableOfContents === void 0 ? void 0 : tableOfContents.items)) {
+-        const firstNode = findFirstNode(tableOfContents.items);
+-        if (firstNode) {
+-            return React.createElement(Redirect, { to: branchSlug ? `/branches/${branchSlug}/${firstNode.slug}` : `/${firstNode.slug}` });
+-        }
+-    }
+-    let elem;
+-    if (isLoadingNode || !isTocFetched) {
+-        elem = React.createElement(Loading, null);
+-    }
+-    else if (isError) {
+-        if (nodeError instanceof ResponseError) {
+-            if (nodeError.code === 402) {
+-                elem = React.createElement(UpgradeToStarter, null);
+-            }
+-            else if (nodeError.code === 403) {
+-                elem = React.createElement(Forbidden, null);
+-            }
+-            else {
+-                elem = React.createElement(NotFound, null);
+-            }
+-        }
+-        else {
+-            elem = React.createElement(NotFound, null);
+-        }
++        platformUrl,
++        platformAuthToken,
++        page,
++      }),
++    { enabled: projectId ? true : false }
++  );
++}
++
++const StoplightProjectImpl = ({
++  projectId,
++  hideTryIt,
++  hideMocking,
++  hideExport,
++  collapseTableOfContents = false,
++  tryItCredentialsPolicy,
++  tryItCorsProxy,
++  page,
++}) => {
++  //   console.log(useParams());
++  console.log(page);
++  const { branchSlug = '', nodeSlug = '' } = useParams();
++  const history = useHistory();
++  const {
++    data: tableOfContents,
++    isFetched: isTocFetched,
++  } = useGetTableOfContents({ projectId, branchSlug, page });
++  const { data: branches } = useGetBranches({ projectId });
++  const {
++    data: node,
++    isLoading: isLoadingNode,
++    isError,
++    error: nodeError,
++  } = useGetNodeContent({
++    nodeSlug,
++    projectId,
++    branchSlug,
++  });
++  const container = React.useRef(null);
++  if (
++    !nodeSlug &&
++    isTocFetched &&
++    (tableOfContents === null || tableOfContents === void 0
++      ? void 0
++      : tableOfContents.items)
++  ) {
++    const firstNode = findFirstNode(tableOfContents.items);
++    if (firstNode) {
++      return React.createElement(Redirect, {
++        to: branchSlug
++          ? `/branches/${branchSlug}/${firstNode.slug}`
++          : `/${firstNode.slug}`,
++      });
+     }
+-    else if (!node) {
++  }
++  let elem;
++  if (isLoadingNode || !isTocFetched) {
++    elem = React.createElement(Loading, null);
++  } else if (isError) {
++    if (nodeError instanceof ResponseError) {
++      if (nodeError.code === 402) {
++        elem = React.createElement(UpgradeToStarter, null);
++      } else if (nodeError.code === 403) {
++        elem = React.createElement(Forbidden, null);
++      } else {
+         elem = React.createElement(NotFound, null);
++      }
++    } else {
++      elem = React.createElement(NotFound, null);
+     }
+-    else {
+-        elem = (React.createElement(NodeContent, { node: node, Link: Link, hideTryIt: hideTryIt, hideMocking: hideMocking, hideExport: hideExport, tryItCredentialsPolicy: tryItCredentialsPolicy, tryItCorsProxy: tryItCorsProxy }));
++  } else if (!node) {
++    elem = React.createElement(NotFound, null);
++  } else {
++    elem = React.createElement(NodeContent, {
++      node: node,
++      Link: Link,
++      hideTryIt: hideTryIt,
++      hideMocking: hideMocking,
++      hideExport: hideExport,
++      tryItCredentialsPolicy: tryItCredentialsPolicy,
++      tryItCorsProxy: tryItCorsProxy,
++    });
++  }
++  const handleTocClick = () => {
++    if (container.current) {
++      container.current.scrollIntoView();
+     }
+-    const handleTocClick = () => {
+-        if (container.current) {
+-            container.current.scrollIntoView();
+-        }
+-    };
+-    return (React.createElement(SidebarLayout, { ref: container, sidebar: React.createElement(React.Fragment, null,
+-            branches && branches.length > 1 ? (React.createElement(BranchSelector, { branchSlug: branchSlug, branches: branches, onChange: branch => history.push(branch.is_default ? `/${nodeSlug}` : `/branches/${branch.slug}/${nodeSlug}`) })) : null,
+-            tableOfContents ? (React.createElement(TableOfContents, { activeId: (node === null || node === void 0 ? void 0 : node.id) || (nodeSlug === null || nodeSlug === void 0 ? void 0 : nodeSlug.split('-')[0]) || '', tableOfContents: tableOfContents, Link: Link, collapseTableOfContents: collapseTableOfContents, onLinkClick: handleTocClick })) : null) }, elem));
++  };
++  return React.createElement(
++    SidebarLayout,
++    {
++      ref: container,
++      sidebar: React.createElement(
++        React.Fragment,
++        null,
++        branches && branches.length > 1
++          ? React.createElement(BranchSelector, {
++              branchSlug: branchSlug,
++              branches: branches,
++              onChange: (branch) =>
++                history.push(
++                  branch.is_default
++                    ? `/${nodeSlug}`
++                    : `/branches/${branch.slug}/${nodeSlug}`
++                ),
++            })
++          : null,
++        tableOfContents
++          ? React.createElement(TableOfContents, {
++              activeId:
++                (node === null || node === void 0 ? void 0 : node.id) ||
++                (nodeSlug === null || nodeSlug === void 0
++                  ? void 0
++                  : nodeSlug.split('-')[0]) ||
++                '',
++              tableOfContents: tableOfContents,
++              Link: Link,
++              collapseTableOfContents: collapseTableOfContents,
++              onLinkClick: handleTocClick,
++              page: page,
++            })
++          : null
++      ),
++    },
++    elem
++  );
+ };
+ const StoplightProjectRouter = (_a) => {
+-    var { platformUrl, basePath = '/', router } = _a, props = __rest(_a, ["platformUrl", "basePath", "router"]);
+-    const { Router, routerProps } = useRouter(router !== null && router !== void 0 ? router : 'history', basePath);
+-    return (React.createElement(DevPortalProvider, { platformUrl: platformUrl },
+-        React.createElement(Router, Object.assign({}, routerProps, { key: basePath }),
+-            React.createElement(Route, { path: "/branches/:branchSlug/:nodeSlug", exact: true },
+-                React.createElement(StoplightProjectImpl, Object.assign({}, props))),
+-            React.createElement(Route, { path: "/:nodeSlug", exact: true },
+-                React.createElement(StoplightProjectImpl, Object.assign({}, props))),
+-            React.createElement(Route, { path: "/", exact: true },
+-                React.createElement(StoplightProjectImpl, Object.assign({}, props))))));
++  var { platformUrl, basePath = '/', router } = _a,
++    props = __rest(_a, ['platformUrl', 'basePath', 'router']);
++  const { Router, routerProps } = useRouter(
++    router !== null && router !== void 0 ? router : 'history',
++    basePath
++  );
++  return React.createElement(
++    DevPortalProvider,
++    { platformUrl: platformUrl },
++    React.createElement(
++      Router,
++      Object.assign({}, routerProps, { key: basePath }),
++      React.createElement(
++        Route,
++        { path: '/branches/:branchSlug/:nodeSlug', exact: true },
++        React.createElement(StoplightProjectImpl, Object.assign({}, props))
++      ),
++      React.createElement(
++        Route,
++        { path: '/:nodeSlug', exact: true },
++        React.createElement(StoplightProjectImpl, Object.assign({}, props))
++      ),
++      React.createElement(
++        Route,
++        { path: '/', exact: true },
++        React.createElement(StoplightProjectImpl, Object.assign({}, props))
++      )
++    )
++  );
+ };
+-const StoplightProject = pipe(withStyles, withPersistenceBoundary, withMosaicProvider, withQueryClientProvider)(StoplightProjectRouter);
++const StoplightProject = pipe(
++  withStyles,
++  withPersistenceBoundary,
++  withMosaicProvider,
++  withQueryClientProvider
++)(StoplightProjectRouter);
+ 
+-const getNodes = ({ workspaceId, branchSlug, projectIds, search, platformUrl = 'https://stoplight.io', platformAuthToken, }) => __awaiter(void 0, void 0, void 0, function* () {
++const getNodes = ({
++  workspaceId,
++  branchSlug,
++  projectIds,
++  search,
++  platformUrl = 'https://stoplight.io',
++  platformAuthToken,
++}) =>
++  __awaiter(void 0, void 0, void 0, function* () {
+     const queryParams = [];
+     let fetchedWorkspaceId = workspaceId || '';
+-    if (!workspaceId && (projectIds === null || projectIds === void 0 ? void 0 : projectIds.length)) {
+-        const response = yield fetch(`${platformUrl}/api/v1/projects/${projectIds[0]}`, {
+-            headers: Object.assign({ 'Stoplight-Elements-Version': appVersion }, (platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` })),
+-        });
+-        const data = yield response.json();
+-        fetchedWorkspaceId = data.workspace.id;
++    if (
++      !workspaceId &&
++      (projectIds === null || projectIds === void 0
++        ? void 0
++        : projectIds.length)
++    ) {
++      const response = yield fetch(
++        `${platformUrl}/api/v1/projects/${projectIds[0]}`,
++        {
++          headers: Object.assign(
++            { 'Stoplight-Elements-Version': appVersion },
++            platformAuthToken && {
++              Authorization: `Bearer ${platformAuthToken}`,
++            }
++          ),
++        }
++      );
++      const data = yield response.json();
++      fetchedWorkspaceId = data.workspace.id;
+     }
+     if (projectIds && projectIds.length) {
+-        queryParams.push(...projectIds.map((projectId, index) => `project_ids[${index}]=${projectId}`));
++      queryParams.push(
++        ...projectIds.map(
++          (projectId, index) => `project_ids[${index}]=${projectId}`
++        )
++      );
+     }
+     if (search) {
+-        queryParams.push(`search=${search}`);
++      queryParams.push(`search=${search}`);
+     }
+     if (branchSlug) {
+-        queryParams.push(`branchSlug=${branchSlug}`);
++      queryParams.push(`branchSlug=${branchSlug}`);
+     }
+     const query = queryParams.length ? `?${queryParams.join('&')}` : '';
+-    const response = yield fetch(`${platformUrl}/api/v1/workspaces/${fetchedWorkspaceId}/nodes${query}`, {
+-        headers: Object.assign({ 'Stoplight-Elements-Version': appVersion }, (platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` })),
+-    });
++    const response = yield fetch(
++      `${platformUrl}/api/v1/workspaces/${fetchedWorkspaceId}/nodes${query}`,
++      {
++        headers: Object.assign(
++          { 'Stoplight-Elements-Version': appVersion },
++          platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` }
++        ),
++      }
++    );
+     const data = yield response.json();
+     if (!response.ok) {
+-        throw new Error(data);
++      throw new Error(data);
+     }
+     return data;
+-});
++  });
+ 
+-const getWorkspace = ({ projectIds, platformUrl = 'https://stoplight.io', platformAuthToken, }) => __awaiter(void 0, void 0, void 0, function* () {
+-    const response = yield fetch(`${platformUrl}/api/v1/projects/${projectIds[0]}`, {
+-        headers: Object.assign({ 'Stoplight-Elements-Version': appVersion }, (platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` })),
+-    });
++const getWorkspace = ({
++  projectIds,
++  platformUrl = 'https://stoplight.io',
++  platformAuthToken,
++}) =>
++  __awaiter(void 0, void 0, void 0, function* () {
++    const response = yield fetch(
++      `${platformUrl}/api/v1/projects/${projectIds[0]}`,
++      {
++        headers: Object.assign(
++          { 'Stoplight-Elements-Version': appVersion },
++          platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` }
++        ),
++      }
++    );
+     const data = yield response.json();
+     if (!response.ok) {
+-        throw new Error(data);
++      throw new Error(data);
+     }
+     return data;
+-});
++  });
+ 
+-function useGetNodes({ search, workspaceId, branchSlug, projectIds, pause, }) {
+-    const { platformUrl, platformAuthToken } = React.useContext(PlatformContext);
+-    const [debounceSearch] = useDebounce(search, 500);
+-    return useQuery(['workspaceNodes', workspaceId, branchSlug, projectIds, debounceSearch, platformUrl, platformAuthToken], () => getNodes({ workspaceId, branchSlug, projectIds, search: debounceSearch, platformUrl, platformAuthToken }), { enabled: !pause });
++function useGetNodes({ search, workspaceId, branchSlug, projectIds, pause }) {
++  const { platformUrl, platformAuthToken } = React.useContext(PlatformContext);
++  const [debounceSearch] = useDebounce(search, 500);
++  return useQuery(
++    [
++      'workspaceNodes',
++      workspaceId,
++      branchSlug,
++      projectIds,
++      debounceSearch,
++      platformUrl,
++      platformAuthToken,
++    ],
++    () =>
++      getNodes({
++        workspaceId,
++        branchSlug,
++        projectIds,
++        search: debounceSearch,
++        platformUrl,
++        platformAuthToken,
++      }),
++    { enabled: !pause }
++  );
+ }
+ 
+ function useGetWorkspace({ projectIds }) {
+-    const { platformUrl, platformAuthToken } = React.useContext(PlatformContext);
+-    return useQuery(['useWorkspace', projectIds, platformUrl, platformAuthToken], () => getWorkspace({ projectIds, platformUrl, platformAuthToken }));
++  const { platformUrl, platformAuthToken } = React.useContext(PlatformContext);
++  return useQuery(
++    ['useWorkspace', projectIds, platformUrl, platformAuthToken],
++    () => getWorkspace({ projectIds, platformUrl, platformAuthToken })
++  );
+ }
+ 
+-export { BranchSelector, DevPortalProvider, NodeContent, ResponseError, Search, StoplightProject, TableOfContents, getBranches, getNodeContent, getNodes, getTableOfContents, getWorkspace, useGetBranches, useGetNodeContent, useGetNodes, useGetTableOfContents, useGetWorkspace };
++export {
++  BranchSelector,
++  DevPortalProvider,
++  NodeContent,
++  ResponseError,
++  Search,
++  StoplightProject,
++  TableOfContents,
++  getBranches,
++  getNodeContent,
++  getNodes,
++  getTableOfContents,
++  getWorkspace,
++  useGetBranches,
++  useGetNodeContent,
++  useGetNodes,
++  useGetTableOfContents,
++  useGetWorkspace,
++};
