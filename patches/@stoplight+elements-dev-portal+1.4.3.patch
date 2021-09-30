@@ -1,7 +1,7 @@
-diff --git a/node_modules/@stoplight/elements-dev-portal/index.esm.js b/node_modules/@stoplight/elements-dev-portal/index.esm.js
-index 14d5178..72a2362 100644
---- a/node_modules/@stoplight/elements-dev-portal/index.esm.js
-+++ b/node_modules/@stoplight/elements-dev-portal/index.esm.js
+diff --git a/node_modules/@stoplight/elements-dev-portal/index.mjs b/node_modules/@stoplight/elements-dev-portal/index.mjs
+index 14d5178..2fa70e1 100644
+--- a/node_modules/@stoplight/elements-dev-portal/index.mjs
++++ b/node_modules/@stoplight/elements-dev-portal/index.mjs
 @@ -158,11 +158,19 @@ function __awaiter(thisArg, _arguments, P, generator) {
      });
  }
@@ -16,7 +16,7 @@ index 14d5178..72a2362 100644
 +
  const TableOfContents = (_a) => {
 -    var { tableOfContents, activeId, Link, collapseTableOfContents = false, externalScrollbar, onLinkClick } = _a, boxProps = __rest(_a, ["tableOfContents", "activeId", "Link", "collapseTableOfContents", "externalScrollbar", "onLinkClick"]);
-+    var { tableOfContents, activeId, Link, collapseTableOfContents = false, externalScrollbar, onLinkClick, page } = _a, boxProps = __rest(_a, ["tableOfContents", "activeId", "Link", "collapseTableOfContents", "externalScrollbar", "onLinkClick"]);
++    var { tableOfContents, activeId, Link, collapseTableOfContents = false, externalScrollbar, onLinkClick, page } = _a, boxProps = __rest(_a, ["tableOfContents", "activeId", "Link", "collapseTableOfContents", "externalScrollbar", "onLinkClick", "page"]);
      return (React.createElement(Flex, Object.assign({ bg: "canvas-100" }, boxProps, { flexDirection: "col", maxH: "full" }),
          React.createElement(Flex, { flexGrow: true, flexShrink: true, overflowY: "auto" },
 -            React.createElement(TableOfContents$1, { tree: tableOfContents.items, activeId: activeId, Link: Link, maxDepthOpenByDefault: collapseTableOfContents ? 0 : 1, externalScrollbar: externalScrollbar, onLinkClick: onLinkClick })),
@@ -24,3 +24,32 @@ index 14d5178..72a2362 100644
          tableOfContents.hide_powered_by ? null : (React.createElement(PoweredByLink, { source: activeId, pathname: typeof window !== 'undefined' ? window.location.pathname : '', packageType: "elements-dev-portal" }))));
  };
  
+@@ -251,15 +259,15 @@ const getTableOfContents = ({ projectId, branchSlug, platformUrl = 'https://stop
+     return data;
+ });
+ 
+-function useGetTableOfContents({ projectId, branchSlug }) {
++function useGetTableOfContents({ projectId, branchSlug, page }) {
+     const { platformUrl, platformAuthToken } = React.useContext(PlatformContext);
+-    return useQuery(['tableOfContents', projectId, branchSlug, platformUrl, platformAuthToken], () => getTableOfContents({ projectId, branchSlug, platformUrl, platformAuthToken }), { enabled: projectId ? true : false });
++    return useQuery(['tableOfContents', projectId, branchSlug, platformUrl, platformAuthToken], () => getTableOfContents({ projectId, branchSlug, platformUrl, platformAuthToken, page }), { enabled: projectId ? true : false });
+ }
+ 
+-const StoplightProjectImpl = ({ projectId, hideTryIt, hideMocking, hideExport, collapseTableOfContents = false, tryItCredentialsPolicy, tryItCorsProxy, }) => {
++const StoplightProjectImpl = ({ projectId, hideTryIt, hideMocking, hideExport, collapseTableOfContents = false, tryItCredentialsPolicy, tryItCorsProxy, page }) => {
+     const { branchSlug = '', nodeSlug = '' } = useParams();
+     const history = useHistory();
+-    const { data: tableOfContents, isFetched: isTocFetched } = useGetTableOfContents({ projectId, branchSlug });
++    const { data: tableOfContents, isFetched: isTocFetched } = useGetTableOfContents({ projectId, branchSlug, page });
+     const { data: branches } = useGetBranches({ projectId });
+     const { data: node, isLoading: isLoadingNode, isError, error: nodeError, } = useGetNodeContent({
+         nodeSlug,
+@@ -306,7 +314,7 @@ const StoplightProjectImpl = ({ projectId, hideTryIt, hideMocking, hideExport, c
+     };
+     return (React.createElement(SidebarLayout, { ref: container, sidebar: React.createElement(React.Fragment, null,
+             branches && branches.length > 1 ? (React.createElement(BranchSelector, { branchSlug: branchSlug, branches: branches, onChange: branch => history.push(branch.is_default ? `/${nodeSlug}` : `/branches/${branch.slug}/${nodeSlug}`) })) : null,
+-            tableOfContents ? (React.createElement(TableOfContents, { activeId: (node === null || node === void 0 ? void 0 : node.id) || (nodeSlug === null || nodeSlug === void 0 ? void 0 : nodeSlug.split('-')[0]) || '', tableOfContents: tableOfContents, Link: Link, collapseTableOfContents: collapseTableOfContents, onLinkClick: handleTocClick })) : null) }, elem));
++            tableOfContents ? (React.createElement(TableOfContents, { activeId: (node === null || node === void 0 ? void 0 : node.id) || (nodeSlug === null || nodeSlug === void 0 ? void 0 : nodeSlug.split('-')[0]) || '', tableOfContents: tableOfContents, Link: Link, collapseTableOfContents: collapseTableOfContents, onLinkClick: handleTocClick, page:page })) : null) }, elem));
+ };
+ const StoplightProjectRouter = (_a) => {
+     var { platformUrl, basePath = '/', router } = _a, props = __rest(_a, ["platformUrl", "basePath", "router"]);
