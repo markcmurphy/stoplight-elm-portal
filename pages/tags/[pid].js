@@ -14,7 +14,11 @@ const Post = () => {
       <Link href="/">
         <a style={{ color: 'blue', cursor: 'pointer' }}>Home</a>
       </Link>
-      <StoplightProject projectId="cHJqOjI4MDIz" router="memory" page={pid} />
+      {pid ? (
+        <StoplightProject projectId="cHJqOjI4MDIz" router="memory" page={pid} />
+      ) : (
+        'Loading'
+      )}
     </div>
   );
 };
