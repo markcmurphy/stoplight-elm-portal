@@ -1,5 +1,5 @@
 diff --git a/node_modules/@stoplight/elements-dev-portal/index.mjs b/node_modules/@stoplight/elements-dev-portal/index.mjs
-index 14d5178..0aa7f88 100644
+index 14d5178..f5c0e1e 100644
 --- a/node_modules/@stoplight/elements-dev-portal/index.mjs
 +++ b/node_modules/@stoplight/elements-dev-portal/index.mjs
 @@ -1,125 +1,349 @@
@@ -449,7 +449,7 @@ index 14d5178..0aa7f88 100644
  
  /*! *****************************************************************************
  Copyright (c) Microsoft Corporation.
-@@ -137,241 +361,769 @@ PERFORMANCE OF THIS SOFTWARE.
+@@ -137,241 +361,936 @@ PERFORMANCE OF THIS SOFTWARE.
  ***************************************************************************** */
  
  function __rest(s, e) {
@@ -804,15 +804,16 @@ index 14d5178..0aa7f88 100644
 -        headers: Object.assign({ 'Stoplight-Elements-Version': appVersion }, (platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` })),
 -    });
 +    const response = yield fetch(
-+      `${platformUrl}/api/v1/projects/${projectId}/table-of-contents${branchQuery}`,
-+      {
-+        headers: Object.assign(
-+          { 'Stoplight-Elements-Version': appVersion },
-+          platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` }
-+        ),
-+      }
++      `/api/toc`
++      // {
++      //   headers: Object.assign(
++      //     { 'Stoplight-Elements-Version': appVersion },
++      //     platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` }
++      //   ),
++      // }
 +    );
      const data = yield response.json();
++    console.log(data);
      if (!response.ok) {
 -        throw new Error(data);
 +      throw new Error(data);
@@ -826,26 +827,25 @@ index 14d5178..0aa7f88 100644
 -    const { platformUrl, platformAuthToken } = React.useContext(PlatformContext);
 -    return useQuery(['tableOfContents', projectId, branchSlug, platformUrl, platformAuthToken], () => getTableOfContents({ projectId, branchSlug, platformUrl, platformAuthToken }), { enabled: projectId ? true : false });
 -}
-+const getTableOfContents2 = ({
-+  projectId,
-+  branchSlug,
-+  platformUrl = 'https://stoplight.io',
-+  platformAuthToken,
-+  page,
-+}) =>
-+  __awaiter(void 0, void 0, void 0, function* () {
-+    const branchQuery = branchSlug ? `?branch=${branchSlug}` : '';
-+    const response = yield fetch(
-+      `${platformUrl}/api/v1/projects/${projectId}/table-of-contents${branchQuery}`,
-+      {
-+        headers: Object.assign(
-+          { 'Stoplight-Elements-Version': appVersion },
-+          platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` }
-+        ),
-+      }
-+    );
-+    const data = yield response.json();
-+    console.log(data);
++// const getTableOfContents2 = ({
++//   projectId,
++//   branchSlug,
++//   platformUrl = 'https://stoplight.io',
++//   platformAuthToken,
++//   page,
++// }) =>
++//   __awaiter(void 0, void 0, void 0, function* () {
++//     const branchQuery = branchSlug ? `?branch=${branchSlug}` : '';
++//     console.log(page);
++//     console.log(typeof page);
++//     const response = yield fetch(`/api/tags/${page}`, {
++//       headers: Object.assign(
++//         { 'Stoplight-Elements-Version': appVersion },
++//         platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` }
++//       ),
++//     });
++//     const data = yield response.json();
++//     console.log(data);
  
 -const StoplightProjectImpl = ({ projectId, hideTryIt, hideMocking, hideExport, collapseTableOfContents = false, tryItCredentialsPolicy, tryItCorsProxy, }) => {
 -    const { branchSlug = '', nodeSlug = '' } = useParams();
@@ -854,11 +854,41 @@ index 14d5178..0aa7f88 100644
 -    const { data: branches } = useGetBranches({ projectId });
 -    const { data: node, isLoading: isLoadingNode, isError, error: nodeError, } = useGetNodeContent({
 -        nodeSlug,
-+    if (!response.ok) {
-+      throw new Error(data);
-+    }
-+    return data;
-+  });
++//     if (!response.ok) {
++//       throw new Error(data);
++//     }
++//     return data;
++//   });
++const getTableOfContents2 = ({
++  projectId,
++  branchSlug,
++  platformUrl = 'https://stoplight.io',
++  platformAuthToken,
++  page,
++}) => {
++  // const branchQuery = branchSlug ? `?branch=${branchSlug}` : '';
++  console.log(page);
++  console.log(typeof page);
++  fetch(`/api/tags/${page}`, {
++    method: 'GET',
++    redirect: 'follow',
++  })
++    .then((response) => response.json())
++    .then((data) => {
++      if (data.items.length !== 0) {
++        console.log(data);
++        return data;
++      }
++    })
++    .catch((error) => console.log('error', error));
++  // const data = response.json();
++  // console.log(data);
++
++  // if (!response.ok) {
++  //   throw new Error(data);
++  // }
++  // return data;
++};
 +
 +const getItemTags = (
 +  nodeId,
@@ -971,25 +1001,164 @@ index 14d5178..0aa7f88 100644
 +  function tocResults() {
 +    setTocCopy(toc);
 +    tocCopy.items = mappedItems();
-+    // if (tocCopy.items) {
-+    // console.log(tocCopy);
-+    // console.log(tocCopy);
 +    return tocCopy;
 +  }
 +
-+  // if (
-+  //   results.every((e) => {
-+  //     return e.isSuccess;
-+  //   })
-+  // ) {
 +  return tocResults();
-+  // }
 +};
 +
 +function useGetTableOfContents({ projectId, branchSlug, page }) {
++  const placeholderItems = {
++    hide_powered_by: true,
++    items: [
++      {
++        title: 'apps',
++        items: [
++          {
++            id: 'ZG9jOjEyNDYxNzY',
++            title: 'BigCommerce Apps Quick Start Tutorial',
++            type: 'article',
++            slug: 'ZG9jOjEyNDYxNzY-big-commerce-apps-quick-start-tutorial',
++            meta: '',
++          },
++          {
++            id: 'ZG9jOjEyNDYxNzc',
++            title: 'Building Apps',
++            type: 'article',
++            slug: 'ZG9jOjEyNDYxNzc-building-apps',
++            meta: '',
++          },
++          {
++            title: 'guide',
++            items: [
++              {
++                id: 'ZG9jOjEyNDcxNzY',
++                title: 'Introduction to Building Apps',
++                type: 'article',
++                slug: 'ZG9jOjEyNDcxNzY-introduction-to-building-apps',
++                meta: '',
++              },
++              {
++                id: 'ZG9jOjEyNDcxNzc',
++                title: 'Types of Apps',
++                type: 'article',
++                slug: 'ZG9jOjEyNDcxNzc-types-of-apps',
++                meta: '',
++              },
++              {
++                id: 'ZG9jOjEyNDcxNzg',
++                title: 'Beginning App Development',
++                type: 'article',
++                slug: 'ZG9jOjEyNDcxNzg-beginning-app-development',
++                meta: '',
++              },
++              {
++                id: 'ZG9jOjM4MzMzNzM',
++                title: 'Managing Apps in the Developer Portal',
++                type: 'article',
++                slug: 'ZG9jOjM4MzMzNzM-managing-apps-in-the-developer-portal',
++                meta: '',
++              },
++              {
++                id: 'ZG9jOjEyNDcxODA',
++                title: 'Single-Click App OAuth Flow',
++                type: 'article',
++                slug: 'ZG9jOjEyNDcxODA-single-click-app-o-auth-flow',
++                meta: '',
++              },
++              {
++                id: 'ZG9jOjEyNDcxODE',
++                title: 'Single-Click App Callbacks',
++                type: 'article',
++                slug: 'ZG9jOjEyNDcxODE-single-click-app-callbacks',
++                meta: '',
++              },
++              {
++                id: 'ZG9jOjEyNDcxODI',
++                title: 'Supporting Multiple Users',
++                type: 'article',
++                slug: 'ZG9jOjEyNDcxODI-supporting-multiple-users',
++                meta: '',
++              },
++              {
++                id: 'ZG9jOjEyNDcxODM',
++                title: 'Listening for Events',
++                type: 'article',
++                slug: 'ZG9jOjEyNDcxODM-listening-for-events',
++                meta: '',
++              },
++              {
++                id: 'ZG9jOjEyNDcxODQ',
++                title: "Designing a Single-Click App's UI",
++                type: 'article',
++                slug: 'ZG9jOjEyNDcxODQ-designing-a-single-click-app-s-ui',
++                meta: '',
++              },
++              {
++                id: 'ZG9jOjEyNDcxODU',
++                title: 'Creating an External Installation Button',
++                type: 'article',
++                slug:
++                  'ZG9jOjEyNDcxODU-creating-an-external-installation-button',
++                meta: '',
++              },
++              {
++                id: 'ZG9jOjEyNDcxODY',
++                title: 'App Development Best Practices',
++                type: 'article',
++                slug: 'ZG9jOjEyNDcxODY-app-development-best-practices',
++                meta: '',
++              },
++              {
++                id: 'ZG9jOjEyNDcxODc',
++                title: 'App Store Approval Requirements',
++                type: 'article',
++                slug: 'ZG9jOjEyNDcxODc-app-store-approval-requirements',
++                meta: '',
++              },
++              {
++                id: 'ZG9jOjEyNDcxODg',
++                title: 'Publishing an App',
++                type: 'article',
++                slug: 'ZG9jOjEyNDcxODg-publishing-an-app',
++                meta: '',
++              },
++            ],
++          },
++          {
++            title: 'tutorials',
++            items: [
++              {
++                id: 'ZG9jOjEyNDcxODk',
++                title: "Find an App's ID",
++                type: 'article',
++                slug: 'ZG9jOjEyNDcxODk-find-an-app-s-id',
++                meta: '',
++              },
++              {
++                id: 'ZG9jOjEyNDcxOTA',
++                title: 'Building an App with Laravel and React',
++                type: 'article',
++                slug: 'ZG9jOjEyNDcxOTA-building-an-app-with-laravel-and-react',
++                meta: '',
++              },
++            ],
++          },
++        ],
++      },
++    ],
++  };
 +  const { platformUrl, platformAuthToken } = React.useContext(PlatformContext);
++  console.log(page);
 +  return useQuery(
-+    ['tableOfContents', projectId, branchSlug, platformUrl, platformAuthToken],
++    [
++      'tableOfContents',
++      projectId,
++      branchSlug,
++      platformUrl,
++      platformAuthToken,
++      page,
++    ],
 +    () =>
 +      getTableOfContents2({
          projectId,
@@ -1001,17 +1170,18 @@ index 14d5178..0aa7f88 100644
 -        if (firstNode) {
 -            return React.createElement(Redirect, { to: branchSlug ? `/branches/${branchSlug}/${firstNode.slug}` : `/${firstNode.slug}` });
 -        }
+-    }
+-    let elem;
+-    if (isLoadingNode || !isTocFetched) {
+-        elem = React.createElement(Loading, null);
 +        platformUrl,
 +        platformAuthToken,
 +        page,
 +      }),
 +    {
 +      enabled: projectId ? true : false,
++      placeholderData: placeholderItems,
      }
--    let elem;
--    if (isLoadingNode || !isTocFetched) {
--        elem = React.createElement(Loading, null);
--    }
 -    else if (isError) {
 -        if (nodeError instanceof ResponseError) {
 -            if (nodeError.code === 402) {
@@ -1045,6 +1215,7 @@ index 14d5178..0aa7f88 100644
 +  const {
 +    data: tableOfContents,
 +    isFetched: isTocFetched,
++    isSuccess: isTocSuccess,
 +  } = useGetTableOfContents({ projectId, branchSlug, page });
 +
 +  const { data: branches } = useGetBranches({ projectId });
@@ -1141,7 +1312,7 @@ index 14d5178..0aa7f88 100644
 +                ),
 +            })
 +          : null,
-+        tableOfContents
++        tableOfContents && isTocSuccess && page !== undefined
 +          ? React.createElement(TableOfContents, {
 +              activeId:
 +                (node === null || node === void 0 ? void 0 : node.id) ||
@@ -1149,11 +1320,7 @@ index 14d5178..0aa7f88 100644
 +                  ? void 0
 +                  : nodeSlug.split('-')[0]) ||
 +                '',
-+              tableOfContents: useGetItemTags(
-+                tableOfContents,
-+                projectId,
-+                branchSlug
-+              ),
++              tableOfContents: tableOfContents,
 +              Link: Link,
 +              collapseTableOfContents: collapseTableOfContents,
 +              onLinkClick: handleTocClick,

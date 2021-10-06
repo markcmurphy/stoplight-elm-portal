@@ -1,5 +1,5 @@
 diff --git a/node_modules/@stoplight/elements-core/index.mjs b/node_modules/@stoplight/elements-core/index.mjs
-index 1f79912..fa436e6 100644
+index 1f79912..e1bcd3b 100644
 --- a/node_modules/@stoplight/elements-core/index.mjs
 +++ b/node_modules/@stoplight/elements-core/index.mjs
 @@ -1,16 +1,94 @@
@@ -5467,7 +5467,7 @@ index 1f79912..fa436e6 100644
      const data = useResolvedObject(unresolvedData);
      const mocking = React.useContext(MockingContext);
      const isDeprecated = !!data.deprecated;
-@@ -1968,765 +3920,1652 @@ const HttpOperationComponent = React.memo(({ className, data: unresolvedData, ur
+@@ -1968,765 +3920,1653 @@ const HttpOperationComponent = React.memo(({ className, data: unresolvedData, ur
      const httpServiceUri = uri && getServiceUriFromOperation(uri);
      const securitySchemes = flatten(data.security);
      const hasBadges = isDeprecated || securitySchemes.length > 0 || isInternal;
@@ -6765,6 +6765,7 @@ index 1f79912..fa436e6 100644
 +    externalScrollbar = false,
 +    onLinkClick,
 +  }) => {
++    console.log(tree);
      const container = React.useRef(null);
      const child = React.useRef(null);
      React.useEffect(() => {
