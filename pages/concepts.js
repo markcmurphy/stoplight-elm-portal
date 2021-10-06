@@ -12,8 +12,9 @@ export default function Guides() {
       </Link>
       <StoplightProject
         projectId="cHJqOjI4MDIz"
+        // projectId="cHJqOjg3OTYx"
         router="memory"
-        page="Concepts"
+        page="concept"
       />
     </div>
   );
