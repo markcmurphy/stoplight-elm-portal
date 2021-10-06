@@ -7,13 +7,13 @@ export default function Home() {
   return (
     <ul>
       <li>
-        <Link href="/guides">
-          <h2 style={{ color: 'blue', cursor: 'pointer' }}>Guides</h2>
+        <Link href="tags/apps">
+          <h2 style={{ color: 'blue', cursor: 'pointer' }}>Apps</h2>
         </Link>
       </li>
       <li>
-        <Link href="/concepts">
-          <h2 style={{ color: 'blue', cursor: 'pointer' }}>Concepts</h2>
+        <Link href="tags/webhooks">
+          <h2 style={{ color: 'blue', cursor: 'pointer' }}>Webhooks</h2>
         </Link>
       </li>
     </ul>
