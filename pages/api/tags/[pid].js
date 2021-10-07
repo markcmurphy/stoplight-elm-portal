@@ -12,7 +12,6 @@ function filterReq(toc, str) {
   });
 
   let filtered = () => {
-    // console.log(res);
     let copied = copy(toc);
     copied.items = res;
     return copied;
