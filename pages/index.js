@@ -48,7 +48,11 @@ export default function Home() {
       return titlesArr;
     }
 
-    const listItems = printAllVals(titles).map((title) => (
+    function removeDupes(array) {
+      return array.filter((value, index) => array.indexOf(value) === index);
+    }
+
+    const listItems = removeDupes(printAllVals(titles)).map((title) => (
       <ListItem key={title.index} value={title} />
     ));
 
