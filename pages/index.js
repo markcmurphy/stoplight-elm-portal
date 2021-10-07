@@ -2,31 +2,28 @@ import Head from 'next/head';
 import Image from 'next/image';
 import styles from '../styles/Home.module.css';
 import Link from 'next/link';
-import TagCloud from 'react-tag-cloud';
 import { StoplightProject } from '@stoplight/elements-dev-portal';
 import { useState } from 'react';
-import randomColor from 'randomcolor';
 
 export default function Home() {
-  const [results, setResults] = useState([]);
-  const getData = () => {
-    fetch(
-      'https://stoplight.io/api/v1/projects/cHJqOjI4MDIz/table-of-contents',
-      {
-        method: 'GET',
-        redirect: 'follow',
-      }
-    )
-      .then((response) => response.json())
-      .then((result) => {
-        return result.items;
-      });
-  };
+  // const [results, setResults] = useState([]);
+  // const getData = () => {
+  //   fetch(
+  //     'https://stoplight.io/api/v1/projects/cHJqOjI4MDIz/table-of-contents',
+  //     {
+  //       method: 'GET',
+  //       redirect: 'follow',
+  //     }
+  //   )
+  //     .then((response) => response.json())
+  //     .then((result) => {
+  //       return result.items;
+  //     });
+  // };
 
-  console.log(results);
+  // console.log(results);
 
   function ListItem(props) {
-    // Correct! There is no need to specify the key here:
     return (
       <li>
         <Link href={`/tags/${props.value}`}>
@@ -37,12 +34,24 @@ export default function Home() {
   }
 
   function NumberList(props) {
-    console.log(props);
     const titles = props.titles;
-    const listItems = titles.map((title) => (
-      // Correct! Key should be specified inside the array.
-      <ListItem key={title.id} value={title.title} />
+    let titlesArr = [];
+
+    function printAllVals(obj) {
+      for (let k in obj) {
+        if (typeof obj[k] === 'object') {
+          printAllVals(obj[k]);
+        } else {
+          k == 'title' ? titlesArr.push(obj[k]) : null;
+        }
+      }
+      return titlesArr;
+    }
+
+    const listItems = printAllVals(titles).map((title) => (
+      <ListItem key={title.index} value={title} />
     ));
+
     return <ul>{listItems}</ul>;
   }
 
