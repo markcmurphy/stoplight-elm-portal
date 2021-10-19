@@ -23,8 +23,12 @@ function filterReq(toc, str) {
 async function handler(req, res) {
   const { pid } = req.query;
 
+  // devdocs test - cHJqOjg3OTYx
+
   await fetch(
-    'https://stoplight.io/api/v1/projects/cHJqOjI4MDIz/table-of-contents',
+    // 'https://stoplight.io/api/v1/projects/cHJqOjg3OTYx/table-of-contents',
+    'http://localhost:3000/api/toc/mergetags/merge',
+    // 'https://stoplight.io/api/v1/projects/cHJqOjI4MDIz/table-of-contents',
     {
       method: 'GET',
       redirect: 'follow',

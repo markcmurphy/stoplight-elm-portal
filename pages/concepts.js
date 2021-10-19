@@ -11,8 +11,8 @@ export default function Guides() {
         <a style={{ color: 'blue', cursor: 'pointer' }}>Home</a>
       </Link>
       <StoplightProject
-        projectId="cHJqOjI4MDIz"
-        // projectId="cHJqOjg3OTYx"
+        // projectId="cHJqOjI4MDIz"
+        projectId="cHJqOjg3OTYx"
         router="memory"
         page="concept"
       />
