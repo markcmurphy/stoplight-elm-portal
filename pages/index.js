@@ -6,22 +6,7 @@ import { StoplightProject } from '@stoplight/elements-dev-portal';
 import { useState } from 'react';
 
 export default function Home() {
-  // const [results, setResults] = useState([]);
-  // const getData = () => {
-  //   fetch(
-  //     'https://stoplight.io/api/v1/projects/cHJqOjI4MDIz/table-of-contents',
-  //     {
-  //       method: 'GET',
-  //       redirect: 'follow',
-  //     }
-  //   )
-  //     .then((response) => response.json())
-  //     .then((result) => {
-  //       return result.items;
-  //     });
-  // };
-
-  // console.log(results);
+  const [tags, setTags] = useState([]);
 
   function ListItem(props) {
     return (

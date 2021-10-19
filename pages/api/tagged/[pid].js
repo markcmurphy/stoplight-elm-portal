@@ -4,8 +4,6 @@ async function filterReq(toc, tag) {
   }
 
   async function res(toc) {
-    // console.log('🚀 ~ file: [pid].js ~ line 63 ~ res ~ toc', toc);
-
     const mapTags = () =>
       toc.items.map(copy).filter(function f(o) {
         if (o.tags && o.tags.includes(tag)) return true;
@@ -20,7 +18,6 @@ async function filterReq(toc, tag) {
   }
 
   async function filtered(toc) {
-    // console.log(res);
     let copied = copy(toc);
 
     let copiedItems = await res(copied);
@@ -48,9 +45,7 @@ async function handler(req, res) {
   );
 
   const result = await response.json();
-  //   console.log(result);
   const resToc = await filterReq(result, pid);
-  //   console.log('🚀 ~ file: [pid].js ~ line 58 ~ handler ~ resToc', resToc);
 
   try {
     res.send(resToc);

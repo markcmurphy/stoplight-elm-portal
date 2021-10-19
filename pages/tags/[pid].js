@@ -15,7 +15,8 @@ const Post = () => {
         <a style={{ color: 'blue', cursor: 'pointer' }}>Home</a>
       </Link>
       {pid ? (
-        <StoplightProject projectId="cHJqOjI4MDIz" router="memory" page={pid} />
+        // <StoplightProject projectId="cHJqOjI4MDIz" router="memory" page={pid} />
+        <StoplightProject projectId="cHJqOjg3OTYx" router="memory" page={pid} />
       ) : (
         'Loading'
       )}
