@@ -4,9 +4,9 @@ import styles from '../styles/Home.module.css';
 import Link from 'next/link';
 import { StoplightProject } from '@stoplight/elements-dev-portal';
 import { useState } from 'react';
+import { getData } from './api/mergetags/[pid]';
 
-export default function Cloud({ items }) {
-  console.log('🚀 ~ file: cloud.js ~ line 9 ~ Cloud ~ items', items);
+export default function Cloud({ items, tagsArray }) {
   function ListItem(tag) {
     return (
       <li>
@@ -18,43 +18,60 @@ export default function Cloud({ items }) {
   }
 
   function NumberList({ tags }) {
-    function printAllVals(obj) {
-      let tagsArr = [];
-      for (let k in obj) {
-        if (typeof obj[k] === 'object' && obj[k].tags == undefined) {
-          printAllVals(obj[k]);
-        } else {
-          obj[k].tags ? obj[k].tags.forEach((tag) => tagsArr.push(tag)) : null;
-        }
-      }
-      return tagsArr;
-    }
-
     function removeDupes(array) {
       return array.filter((value, index) => array.indexOf(value) === index);
     }
 
-    const listItems = removeDupes(printAllVals(tags)).map((tag, index) => (
+    const listItems = removeDupes(tags).map((tag, index) => (
       <ListItem key={index} value={tag} />
     ));
 
     return <ul>{listItems}</ul>;
   }
 
-  return <NumberList tags={items} style={{ marginLeft: '5vw' }} />;
+  return <NumberList tags={tagsArray} style={{ marginLeft: '5vw' }} />;
+}
+
+export async function getTags(obj) {
+  let tagsArr = [];
+  async function printAllVals(obj) {
+    for (let k in obj) {
+      if (typeof obj[k] === 'object' && obj[k].tags == undefined) {
+        printAllVals(obj[k]);
+      } else {
+        obj[k].tags ? obj[k].tags.forEach((tag) => tagsArr.push(tag)) : null;
+      }
+    }
+
+    return tagsArr;
+  }
+  printAllVals(obj);
 }
 
 export async function getStaticProps() {
-  const res = await fetch(`/api/mergetags/merge`, {
-    method: 'GET',
-    redirect: 'follow',
-  });
+  const { items } = await getData();
+  const tags = await getTags(items);
+  console.log('🚀 ~ file: cloud.js ~ line 54 ~ getStaticProps ~ tags', tags);
 
-  const { items } = await res.json();
+  // let tagsArr = [];
+  // async function printAllVals(obj) {
+  //   for (let k in obj) {
+  //     if (typeof obj[k] === 'object' && obj[k].tags == undefined) {
+  //       printAllVals(obj[k]);
+  //     } else {
+  //       obj[k].tags ? obj[k].tags.forEach((tag) => tagsArr.push(tag)) : null;
+  //     }
+  //   }
+
+  //   return tagsArr;
+  // }
+
+  // let tagsArray = await printAllVals(items);
 
   return {
     props: {
       items,
+      tags,
     },
   };
 }

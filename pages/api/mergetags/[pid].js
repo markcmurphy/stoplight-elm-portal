@@ -1,21 +1,13 @@
-async function mergeTags(toc) {
-  // console.log('🚀 ~ file: [pid].js ~ line 2 ~ mergeTags ~ toc', toc);
-  async function tagHandler(pid) {
-    const response = await fetch(`/api/toc/${pid}`, {
-      method: 'GET',
-      redirect: 'follow',
-    });
-    const result = await response.json();
-    return result;
-  }
+import { getNodeData } from '../toc/[pid]';
 
+async function mergeTags(toc) {
   function copy(o) {
     return Object.assign({}, o);
   }
 
   async function printAllVals(newToc) {
     for (let k in newToc) {
-      let tags = await tagHandler(newToc[k]);
+      let tags = await getNodeData(newToc[k]);
       if (typeof newToc[k] === 'object') {
         await printAllVals(newToc[k]);
       } else {
@@ -29,10 +21,6 @@ async function mergeTags(toc) {
         }
       }
     }
-    // console.log(
-    //   '🚀 ~ file: [pid].js ~ line 34 ~ printAllVals ~ newToc',
-    //   newToc
-    // );
     return newToc;
   }
 
@@ -43,14 +31,9 @@ async function mergeTags(toc) {
   return resolve;
 }
 
-async function handler(req, res) {
-  const { pid } = req.query;
-
+export async function getData() {
   const response = await fetch(
-    // 'https://stoplight.io/api/v1/projects/cHJqOjI4MDIz/table-of-contents',
     'https://stoplight.io/api/v1/projects/cHJqOjI4MDIz/table-of-contents?branch=md-metadata-test',
-    // 'https://stoplight.io/api/v1/projects/cHJqOjg3OTYx/table-of-contents',
-    // 'http://localhost:3000/api/dev/toc',
     {
       method: 'GET',
       redirect: 'follow',
@@ -59,13 +42,15 @@ async function handler(req, res) {
 
   let result = await response.json();
   let items = await mergeTags(result);
-  console.log('🚀 ~ file: [pid].js ~ line 57 ~ handler ~ items', items);
+  return items;
+}
+
+export async function handler(req, res) {
+  const jsonData = await getData();
 
   try {
-    res.send(items);
+    res.send(jsonData);
   } catch (e) {
     console.error(e);
   }
 }
-
-export default handler;

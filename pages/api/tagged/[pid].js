@@ -1,3 +1,5 @@
+import { getData } from '../mergetags/[pid]';
+
 async function filterReq(toc, tag) {
   function copy(o) {
     return Object.assign({}, o);
@@ -31,28 +33,40 @@ async function filterReq(toc, tag) {
   return filteredRes;
 }
 
-async function handler(req, res) {
-  const { pid } = req.query;
-
-  const response = await fetch(
-    // 'https://stoplight.io/api/v1/projects/cHJqOjI4MDIz/table-of-contents',
-    // 'https://stoplight.io/api/v1/projects/cHJqOjg3OTYx/table-of-contents',
-    `/api/mergetags/${pid}`,
-    {
-      method: 'GET',
-      redirect: 'follow',
-    }
+export async function getFilteredToc(page) {
+  const result = await getData();
+  console.log(
+    '🚀 ~ file: [pid].js ~ line 38 ~ getFilteredToc ~ result',
+    result
   );
 
-  const result = await response.json();
-  const resToc = await filterReq(result, pid);
-  // console.log('🚀 ~ file: [pid].js ~ line 49 ~ handler ~ resToc', resToc);
+  //  const { pid } = req.query;
+
+  //  const response = await fetch(
+  //    // 'https://stoplight.io/api/v1/projects/cHJqOjI4MDIz/table-of-contents',
+  //    // 'https://stoplight.io/api/v1/projects/cHJqOjg3OTYx/table-of-contents',
+  //    `/api/mergetags/${pid}`,
+  //    {
+  //      method: 'GET',
+  //      redirect: 'follow',
+  //    }
+  //  );
+
+  // let result = await response.json();
+  let resToc = await filterReq(result, page);
+
+  return resToc;
+}
+
+export default async function handler(req, res) {
+  const { pid } = req.query;
+  const jsonData = await getFilteredToc(pid);
 
   try {
-    res.send(resToc);
+    res.send(jsonData);
   } catch (e) {
     console.error(e);
   }
 }
 
-export default handler;
+// export default handler;

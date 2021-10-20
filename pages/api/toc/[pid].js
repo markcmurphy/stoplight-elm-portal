@@ -7,12 +7,12 @@ const nodeResult = ({ data }) => {
   return tagRegex(data);
 };
 
-async function handler(req, res) {
-  const { pid } = req.query;
+export async function getNodeData(nodeId) {
+  // const { pid } = req.query;
 
-  await fetch(
+  const response = await fetch(
     // real repo
-    `https://stoplight.io/api/v1/projects/cHJqOjI4MDIz/nodes/${pid}?branch=md-metadata-test`,
+    `https://stoplight.io/api/v1/projects/cHJqOjI4MDIz/nodes/${nodeId}?branch=md-metadata-test`,
 
     // demo
     // `https://stoplight.io/api/v1/projects/cHJqOjg3OTYx/nodes/${pid}`,
@@ -20,12 +20,21 @@ async function handler(req, res) {
       method: 'GET',
       redirect: 'follow',
     }
-  )
-    .then((response) => response.json())
-    .then((result) => {
-      res.send(nodeResult(result));
-    })
-    .catch((error) => console.log('error', error));
+  );
+
+  let result = await response.json();
+  let items = await nodeResult(result);
+  return items;
 }
 
-export default handler;
+export default async function handler(req, res) {
+  const { pid } = req.query;
+
+  const jsonData = await getNodeData(pid);
+
+  try {
+    res.send(jsonData);
+  } catch (e) {
+    console.error(e);
+  }
+}
