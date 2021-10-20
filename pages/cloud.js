@@ -5,56 +5,55 @@ import Link from 'next/link';
 import { StoplightProject } from '@stoplight/elements-dev-portal';
 import { useState } from 'react';
 
-export default async function Home() {
-
-  function ListItem(props) {
+export default function Cloud({ items }) {
+  function ListItem(tag) {
     return (
       <li>
-        <Link href={`/tags/${props.value}`}>
-          <a>{props.value}</a>
+        <Link href={`/tags/${tag.value}`}>
+          <a>{tag.value}</a>
         </Link>
       </li>
     );
   }
 
-  async function getItemsList() {
-    const response = await fetch(`http://localhost:3000/api/toc/mergetags/merge`, {
-      method: 'GET',
-      redirect: 'follow',
-    });
-    const result = await response.json();
-    return result;
-  }
-
-  function NumberList(props) {
-    const titles = props.titles;
-    let titlesArr = [];
-
+  function NumberList({ tags }) {
     function printAllVals(obj) {
+      let tagsArr = [];
       for (let k in obj) {
-        if (typeof obj[k] === 'object') {
+        if (typeof obj[k] === 'object' && obj[k].tags == undefined) {
           printAllVals(obj[k]);
         } else {
-          k == 'title' ? titlesArr.push(obj[k]) : null;
+          obj[k].tags.forEach((tag) => tagsArr.push(tag));
         }
       }
-      return titlesArr;
+      return tagsArr;
     }
 
     function removeDupes(array) {
       return array.filter((value, index) => array.indexOf(value) === index);
     }
 
-    const listItems = removeDupes(printAllVals(titles)).map((title) => (
-      <ListItem key={title.index} value={title} />
+    const listItems = removeDupes(printAllVals(tags)).map((tag, index) => (
+      <ListItem key={index} value={tag} />
     ));
 
     return <ul>{listItems}</ul>;
   }
 
-  const items = await getItemsList();
+  return <NumberList tags={items} style={{ marginLeft: '5vw' }} />;
+}
 
+export async function getStaticProps() {
+  const res = await fetch(`http://localhost:3000/api/mergetags/merge`, {
+    method: 'GET',
+    redirect: 'follow',
+  });
 
+  const { items } = await res.json();
 
-  return <NumberList titles={items} style={{ marginLeft: '5vw' }} />;
+  return {
+    props: {
+      items,
+    },
+  };
 }

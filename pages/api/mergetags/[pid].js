@@ -13,8 +13,6 @@ async function mergeTags(toc) {
   }
 
   async function printAllVals(newToc) {
-    // let tags;
-
     for (let k in newToc) {
       let tags = await tagHandler(newToc[k]);
       if (typeof newToc[k] === 'object') {
@@ -28,12 +26,8 @@ async function mergeTags(toc) {
         if (k == 'id') {
           return Object.assign(newToc, newObj);
         }
-        // else {
-        //   await printAllVals(newToc.items);
-        // }
       }
     }
-
     return newToc;
   }
 
@@ -59,6 +53,7 @@ async function handler(req, res) {
 
   let result = await response.json();
   let items = await mergeTags(result);
+  // console.log('🚀 ~ file: [pid].js ~ line 69 ~ handler ~ items', items);
 
   try {
     res.send(items);

@@ -37,8 +37,8 @@ export default function Home() {
       return array.filter((value, index) => array.indexOf(value) === index);
     }
 
-    const listItems = removeDupes(printAllVals(titles)).map((title) => (
-      <ListItem key={title.index} value={title} />
+    const listItems = removeDupes(printAllVals(titles)).map((title, index) => (
+      <ListItem key={index} value={title} />
     ));
 
     return <ul>{listItems}</ul>;

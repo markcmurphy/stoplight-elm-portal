@@ -46,6 +46,7 @@ async function handler(req, res) {
 
   const result = await response.json();
   const resToc = await filterReq(result, pid);
+  // console.log('🚀 ~ file: [pid].js ~ line 49 ~ handler ~ resToc', resToc);
 
   try {
     res.send(resToc);
