@@ -6,6 +6,7 @@ import { StoplightProject } from '@stoplight/elements-dev-portal';
 import { useState } from 'react';
 
 export default function Cloud({ items }) {
+  console.log('🚀 ~ file: cloud.js ~ line 9 ~ Cloud ~ items', items);
   function ListItem(tag) {
     return (
       <li>
@@ -23,7 +24,7 @@ export default function Cloud({ items }) {
         if (typeof obj[k] === 'object' && obj[k].tags == undefined) {
           printAllVals(obj[k]);
         } else {
-          obj[k].tags.forEach((tag) => tagsArr.push(tag));
+          obj[k].tags ? obj[k].tags.forEach((tag) => tagsArr.push(tag)) : null;
         }
       }
       return tagsArr;

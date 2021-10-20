@@ -1,4 +1,5 @@
 async function mergeTags(toc) {
+  // console.log('🚀 ~ file: [pid].js ~ line 2 ~ mergeTags ~ toc', toc);
   async function tagHandler(pid) {
     const response = await fetch(`http://localhost:3000/api/toc/${pid}`, {
       method: 'GET',
@@ -28,6 +29,10 @@ async function mergeTags(toc) {
         }
       }
     }
+    // console.log(
+    //   '🚀 ~ file: [pid].js ~ line 34 ~ printAllVals ~ newToc',
+    //   newToc
+    // );
     return newToc;
   }
 
@@ -43,7 +48,8 @@ async function handler(req, res) {
 
   const response = await fetch(
     // 'https://stoplight.io/api/v1/projects/cHJqOjI4MDIz/table-of-contents',
-    'https://stoplight.io/api/v1/projects/cHJqOjg3OTYx/table-of-contents',
+    'https://stoplight.io/api/v1/projects/cHJqOjI4MDIz/table-of-contents?branch=md-metadata-test',
+    // 'https://stoplight.io/api/v1/projects/cHJqOjg3OTYx/table-of-contents',
     // 'http://localhost:3000/api/dev/toc',
     {
       method: 'GET',
@@ -53,7 +59,7 @@ async function handler(req, res) {
 
   let result = await response.json();
   let items = await mergeTags(result);
-  // console.log('🚀 ~ file: [pid].js ~ line 69 ~ handler ~ items', items);
+  console.log('🚀 ~ file: [pid].js ~ line 57 ~ handler ~ items', items);
 
   try {
     res.send(items);

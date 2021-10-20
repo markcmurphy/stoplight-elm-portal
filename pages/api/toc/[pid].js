@@ -12,10 +12,10 @@ async function handler(req, res) {
 
   await fetch(
     // real repo
-    // `https://stoplight.io/api/v1/projects/cHJqOjI4MDIz/nodes/${pid}`,
+    `https://stoplight.io/api/v1/projects/cHJqOjI4MDIz/nodes/${pid}?branch=md-metadata-test`,
 
     // demo
-    `https://stoplight.io/api/v1/projects/cHJqOjg3OTYx/nodes/${pid}`,
+    // `https://stoplight.io/api/v1/projects/cHJqOjg3OTYx/nodes/${pid}`,
     {
       method: 'GET',
       redirect: 'follow',
