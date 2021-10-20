@@ -1,7 +1,7 @@
 async function mergeTags(toc) {
   // console.log('🚀 ~ file: [pid].js ~ line 2 ~ mergeTags ~ toc', toc);
   async function tagHandler(pid) {
-    const response = await fetch(`http://localhost:3000/api/toc/${pid}`, {
+    const response = await fetch(`/api/toc/${pid}`, {
       method: 'GET',
       redirect: 'follow',
     });

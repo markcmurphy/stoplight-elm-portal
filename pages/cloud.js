@@ -45,7 +45,7 @@ export default function Cloud({ items }) {
 }
 
 export async function getStaticProps() {
-  const res = await fetch(`http://localhost:3000/api/mergetags/merge`, {
+  const res = await fetch(`/api/mergetags/merge`, {
     method: 'GET',
     redirect: 'follow',
   });

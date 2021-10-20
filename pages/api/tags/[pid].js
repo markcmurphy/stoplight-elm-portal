@@ -27,7 +27,7 @@ async function handler(req, res) {
 
   await fetch(
     // 'https://stoplight.io/api/v1/projects/cHJqOjg3OTYx/table-of-contents',
-    'http://localhost:3000/api/toc/mergetags/merge',
+    '/api/toc/mergetags/merge',
     // 'https://stoplight.io/api/v1/projects/cHJqOjI4MDIz/table-of-contents',
     {
       method: 'GET',
