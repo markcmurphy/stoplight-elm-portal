@@ -1,5 +1,5 @@
 diff --git a/node_modules/@stoplight/elements-dev-portal/index.mjs b/node_modules/@stoplight/elements-dev-portal/index.mjs
-index 14d5178..61a65e6 100644
+index 14d5178..04f59f9 100644
 --- a/node_modules/@stoplight/elements-dev-portal/index.mjs
 +++ b/node_modules/@stoplight/elements-dev-portal/index.mjs
 @@ -239,32 +239,36 @@ function useGetNodeContent({ nodeSlug, projectId, branchSlug, }) {
@@ -10,18 +10,16 @@ index 14d5178..61a65e6 100644
 +const getTableOfContents = ({ projectId, branchSlug, platformUrl = 'https://stoplight.io', platformAuthToken, page}) => __awaiter(void 0, void 0, void 0, function* () {
      const branchQuery = branchSlug ? `?branch=${branchSlug}` : '';
 -    const response = yield fetch(`${platformUrl}/api/v1/projects/${projectId}/table-of-contents${branchQuery}`, {
--        headers: Object.assign({ 'Stoplight-Elements-Version': appVersion }, (platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` })),
--    });
 +    console.log(page)
-+    const response = page ? yield fetch(`/api/tagged/${page}`, {
-+        // headers: Object.assign({ 'Stoplight-Elements-Version': appVersion }, (platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` })),
++    const response = page ? yield fetch(`/api/tagged/${page}`) : yield fetch(`${platformUrl}/api/v1/projects/${projectId}/table-of-contents`, {
+         headers: Object.assign({ 'Stoplight-Elements-Version': appVersion }, (platformAuthToken && { Authorization: `Bearer ${platformAuthToken}` })),
 +
-+    }) : yield fetch(`${platformUrl}/api/v1/projects/${projectId}/table-of-contents`);
+     });
      const data = yield response.json();
++    console.log("🚀 ~ file: index.mjs ~ line 250 ~ getTableOfContents ~ data", data)
      if (!response.ok) {
          throw new Error(data);
      }
-+    console.log(data)
      return data;
  });
  
