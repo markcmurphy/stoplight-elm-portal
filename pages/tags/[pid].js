@@ -3,7 +3,7 @@ import '@stoplight/elements-dev-portal/styles.min.css';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
-import { getTags } from '../cloud';
+// import { getTags } from '../cloud';
 import { getData } from '../api/mergetags/[pid]';
 
 const Tags = () => {
@@ -24,22 +24,22 @@ const Tags = () => {
   );
 };
 
-export async function getStaticPaths() {
-  const toc = await getData();
-  const tagsArray = await getTags(toc);
-  return {
-    paths: tagsArray.map((tag) => {
-      {
-        params: {
-          pid: tag;
-        }
-      }
-    }),
-    // paths: [
-    //   { params: { } }
-    // ],
-    fallback: true,
-  };
-}
+// export async function getStaticPaths() {
+//   const toc = await getData();
+//   const tagsArray = await getTags(toc);
+//   return {
+//     paths: tagsArray.map((tag) => {
+//       {
+//         params: {
+//           pid: tag;
+//         }
+//       }
+//     }),
+//     // paths: [
+//     //   { params: { } }
+//     // ],
+//     fallback: true,
+//   };
+// }
 
 export default Tags;
