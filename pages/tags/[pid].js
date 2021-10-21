@@ -1,4 +1,7 @@
-import { StoplightProject } from '@stoplight/elements-dev-portal';
+import {
+  StoplightProject,
+  useGetNodeContent,
+} from '@stoplight/elements-dev-portal';
 import '@stoplight/elements-dev-portal/styles.min.css';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -25,8 +28,24 @@ const Tags = () => {
 };
 
 // export async function getStaticPaths() {
-//   const toc = await getData();
-//   const tagsArray = await getTags(toc);
+//   const items = await getData();
+//   // const tagsArray = await getTags(toc);
+
+//     let tagsArr = [];
+//     async function printAllVals(obj) {
+//       for (let k in obj) {
+//         if (typeof obj[k] === 'object' && obj[k].tags == undefined) {
+//           printAllVals(obj[k]);
+//         } else {
+//           obj[k].tags ? obj[k].tags.forEach((tag) => tagsArr.push(tag)) : null;
+//         }
+//       }
+
+//       return tagsArr;
+//     }
+
+//     const tagsArray = await printAllVals(items);
+
 //   return {
 //     paths: tagsArray.map((tag) => {
 //       {
@@ -35,10 +54,18 @@ const Tags = () => {
 //         }
 //       }
 //     }),
-//     // paths: [
-//     //   { params: { } }
-//     // ],
 //     fallback: true,
+//   };
+// }
+
+// export async function getStaticProps({params}) {
+//   const { items } = await getData();
+//   const { pid } = router.query;
+
+//   return {
+//     props: {
+
+//     },
 //   };
 // }
 
