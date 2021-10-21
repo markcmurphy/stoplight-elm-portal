@@ -1,6 +1,10 @@
 module.exports = {
   reactStrictMode: true,
-  generateEtags: false,
+  experimental: {
+    staticPageGenerationTimeout: 300,
+  },
+  // generateEtags: false,
+
   webpackDevMiddleware: (config) => {
     // Don't ignore all node modules.
     config.watchOptions.ignored = config.watchOptions.ignored.filter(
