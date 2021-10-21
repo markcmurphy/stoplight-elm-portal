@@ -10,6 +10,7 @@ import { useRouter } from 'next/router';
 // import { getTags } from '../cloud';
 import { getData } from '../api/mergetags/[pid]';
 import { filterReq } from '../api/tagged/[pid]';
+import { getFilteredToc } from '../api/tagged/[pid]';
 import { removeDupes } from '../cloud';
 
 const Tags = (props) => {
@@ -50,6 +51,11 @@ export async function getStaticPaths(context) {
     return tagsArr;
   }
   const tagsArray = await printAllVals(items);
+
+  console.log(
+    '🚀 ~ file: [pid].js ~ line 55 ~ paths ~ removeDupes(tagsArray)',
+    removeDupes(tagsArray)
+  );
   const paths = removeDupes(tagsArray).map((tag) => ({
     params: { pid: tag },
   }));
@@ -67,7 +73,7 @@ export async function getStaticProps({ params }) {
   );
   const { items } = await getData();
   // const { pid } = router.query;
-  const toc = await filterReq(items, params.pid);
+  const toc = await getFilteredToc(params.pid);
   console.log('🚀 ~ file: [pid].js ~ line 74 ~ getStaticProps ~ toc', toc);
 
   return {

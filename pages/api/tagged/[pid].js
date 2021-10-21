@@ -6,7 +6,7 @@ export async function filterReq(toc, tag) {
   }
 
   async function res(toc) {
-    const mapTags = () =>
+    const mapTags = (toc) =>
       toc.items.map(copy).filter(function f(o) {
         if (o.tags && o.tags.includes(tag)) return true;
 
