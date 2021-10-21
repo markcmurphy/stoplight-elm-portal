@@ -15,7 +15,7 @@ export async function filterReq(toc, tag) {
         }
       });
 
-    let mapped = await mapTags();
+    let mapped = await mapTags(toc);
     return mapped;
   }
 
