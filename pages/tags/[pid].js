@@ -1,6 +1,7 @@
 import {
   StoplightProject,
   useGetNodeContent,
+  Search,
 } from '@stoplight/elements-dev-portal';
 import '@stoplight/elements-dev-portal/styles.min.css';
 import Link from 'next/link';
@@ -8,11 +9,13 @@ import { useRouter } from 'next/router';
 
 // import { getTags } from '../cloud';
 import { getData } from '../api/mergetags/[pid]';
+import { filterReq } from '../api/tagged/[pid]';
+import { removeDupes } from '../cloud';
 
-const Tags = () => {
+const Tags = (props) => {
   const router = useRouter();
   const { pid } = router.query;
-
+  console.log('🚀 ~ file: [pid].js ~ line 15 ~ Tags ~ props', props);
   return (
     <div>
       <Link href="/">
@@ -27,46 +30,49 @@ const Tags = () => {
   );
 };
 
-// export async function getStaticPaths() {
-//   const items = await getData();
-//   // const tagsArray = await getTags(toc);
+export async function getStaticPaths(context) {
+  console.log(
+    '🚀 ~ file: [pid].js ~ line 34 ~ getStaticPaths ~ context',
+    context
+  );
 
-//     let tagsArr = [];
-//     async function printAllVals(obj) {
-//       for (let k in obj) {
-//         if (typeof obj[k] === 'object' && obj[k].tags == undefined) {
-//           printAllVals(obj[k]);
-//         } else {
-//           obj[k].tags ? obj[k].tags.forEach((tag) => tagsArr.push(tag)) : null;
-//         }
-//       }
+  const items = await getData();
 
-//       return tagsArr;
-//     }
+  let tagsArr = [];
+  async function printAllVals(obj) {
+    for (let k in obj) {
+      if (typeof obj[k] === 'object' && obj[k].tags == undefined) {
+        printAllVals(obj[k]);
+      } else {
+        obj[k].tags ? obj[k].tags.forEach((tag) => tagsArr.push(tag)) : null;
+      }
+    }
+    return tagsArr;
+  }
+  const tagsArray = await printAllVals(items);
+  const paths = removeDupes(tagsArray).map((tag) => ({
+    params: { pid: tag },
+  }));
+  console.log('🚀 ~ file: [pid].js ~ line 60 ~ paths ~ paths ', paths);
+  return {
+    paths,
+    fallback: true,
+  };
+}
 
-//     const tagsArray = await printAllVals(items);
+export async function getStaticProps({ params }) {
+  console.log(
+    '🚀 ~ file: [pid].js ~ line 63 ~ getStaticProps ~ params',
+    params
+  );
+  const { items } = await getData();
+  // const { pid } = router.query;
+  const toc = await filterReq(items, params.pid);
+  console.log('🚀 ~ file: [pid].js ~ line 74 ~ getStaticProps ~ toc', toc);
 
-//   return {
-//     paths: tagsArray.map((tag) => {
-//       {
-//         params: {
-//           pid: tag;
-//         }
-//       }
-//     }),
-//     fallback: true,
-//   };
-// }
-
-// export async function getStaticProps({params}) {
-//   const { items } = await getData();
-//   const { pid } = router.query;
-
-//   return {
-//     props: {
-
-//     },
-//   };
-// }
+  return {
+    props: { toc },
+  };
+}
 
 export default Tags;

@@ -1,6 +1,6 @@
 import { getData } from '../mergetags/[pid]';
 
-async function filterReq(toc, tag) {
+export async function filterReq(toc, tag) {
   function copy(o) {
     return Object.assign({}, o);
   }
@@ -35,10 +35,6 @@ async function filterReq(toc, tag) {
 
 export async function getFilteredToc(page) {
   const result = await getData();
-  console.log(
-    '🚀 ~ file: [pid].js ~ line 38 ~ getFilteredToc ~ result',
-    result
-  );
 
   //  const { pid } = req.query;
 

@@ -7,10 +7,10 @@ import { useState } from 'react';
 import { getData } from './api/mergetags/[pid]';
 
 export default function Cloud({ items, tagsArray }) {
-  console.log('🚀 ~ file: cloud.js ~ line 10 ~ Cloud ~ tagsArray', tagsArray);
+  // console.log('🚀 ~ file: cloud.js ~ line 10 ~ Cloud ~ tagsArray', tagsArray);
 
   function ListItem(tag) {
-    console.log('🚀 ~ file: cloud.js ~ line 25 ~ ListItem ~ tag', tag);
+    // console.log('🚀 ~ file: cloud.js ~ line 25 ~ ListItem ~ tag', tag);
     return (
       <li>
         <Link href={`/tags/${tag.value}`}>
@@ -21,11 +21,11 @@ export default function Cloud({ items, tagsArray }) {
   }
 
   function NumberList({ tags }) {
-    console.log('🚀 ~ file: cloud.js ~ line 24 ~ NumberList ~ tags', tags);
+    // console.log('🚀 ~ file: cloud.js ~ line 24 ~ NumberList ~ tags', tags);
 
-    function removeDupes(array) {
-      return array.filter((value, index) => array.indexOf(value) === index);
-    }
+    // function removeDupes(array) {
+    //   return array.filter((value, index) => array.indexOf(value) === index);
+    // }
 
     const listItems = removeDupes(tags).map((tag, index) => (
       <ListItem key={index} value={tag} />
@@ -37,6 +37,9 @@ export default function Cloud({ items, tagsArray }) {
   return <NumberList tags={tagsArray} style={{ marginLeft: '5vw' }} />;
 }
 
+export function removeDupes(array) {
+  return array.filter((value, index) => array.indexOf(value) === index);
+}
 // export function getTags(obj) {
 //   let tagsArr = [];
 //   function printAllVals(obj) {
