@@ -45,7 +45,7 @@ export async function getData() {
   return items;
 }
 
-export async function handler(req, res) {
+export default async function handler(req, res) {
   const jsonData = await getData();
 
   try {
