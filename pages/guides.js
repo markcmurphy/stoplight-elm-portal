@@ -11,9 +11,10 @@ export default function Guides() {
         <a style={{ color: 'blue', cursor: 'pointer' }}>Home</a>
       </Link>
       <StoplightProject
-        projectId="cHJqOjI4MDIz"
+        projectId="cHJqOjIwNjAz"
         router="memory"
-        page="Guides"
+        tryItCorsProxy="https://cors-anywhere-proxy-mm.herokuapp.com/"
+        // page="Guides"
       />
     </div>
   );
