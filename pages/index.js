@@ -16,6 +16,11 @@ export default function Home() {
           <h2 style={{ color: 'blue', cursor: 'pointer' }}>Webhooks</h2>
         </Link>
       </li>
+      <li>
+        <Link href="guides">
+          <h2 style={{ color: 'blue', cursor: 'pointer' }}>guides</h2>
+        </Link>
+      </li>
     </ul>
   );
 }

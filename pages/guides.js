@@ -13,7 +13,7 @@ export default function Guides() {
       <StoplightProject
         projectId="cHJqOjIwNjAz"
         router="memory"
-        tryItCorsProxy="https://cors-anywhere-proxy-mm.herokuapp.com/"
+        // tryItCorsProxy="https://cors-anywhere-proxy-mm.herokuapp.com/"
       />
     </div>
   );
