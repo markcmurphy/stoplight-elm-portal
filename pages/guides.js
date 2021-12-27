@@ -14,7 +14,6 @@ export default function Guides() {
         projectId="cHJqOjIwNjAz"
         router="memory"
         tryItCorsProxy="https://cors-anywhere-proxy-mm.herokuapp.com/"
-        // page="Guides"
       />
     </div>
   );
