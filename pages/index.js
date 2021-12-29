@@ -7,27 +7,14 @@ import '@stoplight/elements-dev-portal/styles.min.css';
 
 export default function Home() {
   return (
-    // <ul>
-    //   <li>
-    //     <Link href="tags/apps">
-    //       <h2 style={{ color: 'blue', cursor: 'pointer' }}>Apps</h2>
-    //     </Link>
-    //   </li>
-    //   <li>
-    //     <Link href="tags/webhooks">
-    //       <h2 style={{ color: 'blue', cursor: 'pointer' }}>Webhooks</h2>
-    //     </Link>
-    //   </li>
-    //   <li>
-    //     <Link href="guides">
-    //       <h2 style={{ color: 'blue', cursor: 'pointer' }}>guides</h2>
-    //     </Link>
-    //   </li>
-    // </ul>
-    <StoplightProject
-      projectId="cHJqOjIwNjAz"
-      router="memory"
-      // tryItCorsProxy="https://cors-anywhere-proxy-mm.herokuapp.com/"
-    />
+    <ul>
+      <li>
+        <Link href="apispecs">
+          <h2 style={{ color: 'blue', cursor: 'pointer', margin: '10%' }}>
+            API Reference
+          </h2>
+        </Link>
+      </li>
+    </ul>
   );
 }

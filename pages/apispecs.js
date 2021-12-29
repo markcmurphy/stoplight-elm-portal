@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import styles from '../styles/Home.module.css';
 import Link from 'next/link';
 
-export default function Guides() {
+export default function Apispecs() {
   return (
     <div>
       <Link href="/">
@@ -13,8 +13,24 @@ export default function Guides() {
       <StoplightProject
         projectId="cHJqOjIwNjAz"
         router="memory"
-        // tryItCorsProxy="https://cors-anywhere-proxy-mm.herokuapp.com/"
+        // tryItCorsProxy="http://localhost:8585/"
       />
     </div>
   );
 }
+
+// function Page({ data }) {
+//   // Render data...
+// }
+
+// // This gets called on every request
+// export async function getServerSideProps() {
+//   // Fetch data from external API
+//   const res = await fetch(`https://.../data`);
+//   const data = await res.json();
+
+//   // Pass data to the page via props
+//   return { props: { data } };
+// }
+
+// export default Page;

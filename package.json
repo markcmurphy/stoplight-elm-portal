@@ -13,6 +13,7 @@
     "@stoplight/elements-core": "^7.3.6",
     "@stoplight/elements-dev-portal": "^1.4.3",
     "next": "11.1.2",
+    "node-fetch": "^2.6.6",
     "patch-package": "^6.4.7",
     "react": "17.0.2",
     "react-dom": "17.0.2"

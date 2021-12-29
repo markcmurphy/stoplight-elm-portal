@@ -1,0 +1,138 @@
+diff --git a/node_modules/@stoplight/elements-core/index.esm.js b/node_modules/@stoplight/elements-core/index.esm.js
+index 1f79912..856d62e 100644
+--- a/node_modules/@stoplight/elements-core/index.esm.js
++++ b/node_modules/@stoplight/elements-core/index.esm.js
+@@ -1697,6 +1697,7 @@ const TryIt = ({ httpOperation, mockUrl, onRequestChange, requestBodyIndex, embe
+             let response;
+             try {
+                 response = yield fetch(...request);  
++                // response = yield fetch('/.netlify/functions/node-fetch', ...request);
+             }
+             catch (e) {
+                 setResponse({ error: new NetworkError(e.message) });
+diff --git a/node_modules/@stoplight/elements-core/index.mjs b/node_modules/@stoplight/elements-core/index.mjs
+index 1f79912..7083c72 100644
+--- a/node_modules/@stoplight/elements-core/index.mjs
++++ b/node_modules/@stoplight/elements-core/index.mjs
+@@ -246,6 +246,30 @@ const findTitle = (parent) => {
+     return selectAll('[type=text]', parent).map(textNode => String(textNode.value)).join(' ');
+ };
+ 
++// find tags
++function useComputeMarkdownTags(tree) {
++  return React.useMemo(() => computeMarkdownTags(tree), [tree]);
++}
++
++function computeMarkdownTags(tree) {
++  return selectAll(':root > [type=definition]', tree).map((tag) => {
++    var _a;
++    return {
++      tags: tag.title,
++      // id:
++      //   ((_a = heading.data) === null || _a === void 0 ? void 0 : _a.id) ||
++      //   '',
++      // depth: heading.depth - 1,
++    };
++  });
++  // .filter((item) => item.depth >= 1 && item.depth <= 2);
++}
++// const findTags = (parent) => {
++//   return selectAll('[type=text]', parent)
++//     .map((textNode) => String(textNode.value))
++//     .join(' ');
++// };
++
+ function useLocationHash() {
+     const isBrowser = typeof window !== undefined;
+     const [locationHash, setLocationHash] = React.useState(isBrowser && window.location.hash);
+@@ -263,7 +287,9 @@ const ArticleHeadings = ({ tree, container }) => {
+     const { width } = useComponentSize(container);
+     const showHeadings = width >= 768;
+     const headings = useComputeMarkdownHeadings(tree);
+-    return React.createElement(Headings, { className: "ArticleHeadings", headings: headings, minimal: !showHeadings });
++    const tags = useComputeMarkdownTags(tree);
++    // console.log(tags);
++    return React.createElement(Headings, { className: "ArticleHeadings", headings: headings, tags: tags, minimal: !showHeadings });
+ };
+ const Headings = ({ headings, className, title = 'On This Page', minimal }) => {
+     const locationHash = useLocationHash();
+@@ -469,7 +495,9 @@ const getServerUrlWithDefaultValues = (server) => {
+     var _a;
+     let urlString = server.url;
+     const variables = Object.entries((_a = server.variables) !== null && _a !== void 0 ? _a : {});
++    console.log("🚀 ~ file: index.mjs ~ line 498 ~ getServerUrlWithDefaultValues ~ variables", variables)
+     variables.forEach(([variableName, variableInfo]) => {
++        console.log("🚀 ~ file: index.mjs ~ line 500 ~ variables.forEach ~ variableInfo", variableInfo)
+         urlString = urlString.replace(`{${variableName}}`, variableInfo.default);
+     });
+     let url = URI(urlString);
+@@ -742,11 +770,23 @@ const AuthTokenInput = ({ type, name, value, onChange }) => {
+         React.createElement(Flex, { flex: 1 },
+             React.createElement(Input, { id: inputId, "aria-label": name, appearance: "minimal", flex: 1, placeholder: type === 'oauth2' ? 'Bearer 123' : '123', value: value, type: "text", required: true, onChange: e => onChange(e.currentTarget.value) }))));
+ };
++const HashInput = ({ type, name, value, onChange }) => {
++    const inputId = useUniqueId(`id_hash_${name}_`);
++    return (React.createElement(React.Fragment, null,
++        React.createElement("label", { "aria-hidden": "true", htmlFor: inputId }, name),
++        React.createElement(Text, { mx: 3 }, ":"),
++        React.createElement(Flex, { flex: 1 },
++            React.createElement(Input, { id: inputId, "aria-label": name, appearance: "minimal", flex: 1, placeholder: type === 'oauth2' ? 'Bearer 123' : '123', value: value, type: "text", required: true, onChange: e => onChange(e.currentTarget.value) }))));
++};
+ 
+ const APIKeyAuth = ({ scheme, onChange, value }) => {
+     return (React.createElement(Panel.Content, { className: "ParameterGrid" },
+         React.createElement(AuthTokenInput, { type: "apiKey", name: scheme.name, value: value, onChange: onChange })));
+ };
++const StoreHash = ({ scheme, onChange, value }) => {
++    return (React.createElement(Panel.Content, { className: "ParameterGrid" },
++        React.createElement(HashInput, { type: "apiKey", name: scheme.name, value: value, onChange: onChange })));
++};
+ 
+ const BasicAuth = ({ onChange, value }) => {
+     const [username = '', password = ''] = decode(value).split(':');
+@@ -846,7 +886,7 @@ const SecuritySchemeComponent = (_a) => {
+     var { scheme } = _a, rest = __rest(_a, ["scheme"]);
+     switch (scheme.type) {
+         case 'apiKey':
+-            return React.createElement(APIKeyAuth, Object.assign({ scheme: scheme }, rest));
++            return React.createElement(APIKeyAuth, Object.assign({ scheme: scheme }, rest))         
+         case 'oauth2':
+             return React.createElement(OAuth2Auth, Object.assign({ scheme: scheme }, rest));
+         case 'http':
+@@ -1694,9 +1734,19 @@ const TryIt = ({ httpOperation, mockUrl, onRequestChange, requestBodyIndex, embe
+                 credentials: tryItCredentialsPolicy,
+                 corsProxy,
+             });
++            console.log("🚀 ~ file: index.mjs ~ line 1723 ~ handleClick ~ request", ...request)
++            console.log("🚀 ~ file: index.mjs ~ line 1723 ~ handleClick ~ request", request)
++            
+             let response;
++            let endpoint = request[0];
++            console.log("🚀 ~ file: index.mjs ~ line 1728 ~ handleClick ~ endpoint", endpoint)
++            let token = request[1].headers["X-Auth-Token"];
++            console.log("🚀 ~ file: index.mjs ~ line 1730 ~ handleClick ~ token", token)
++            
++
+             try {
+-                response = yield fetch(...request);
++                response = yield fetch(`/.netlify/functions/node-fetch?endpoint=${endpoint}&token=${token}`);                
++
+             }
+             catch (e) {
+                 setResponse({ error: new NetworkError(e.message) });
+@@ -1707,6 +1757,7 @@ const TryIt = ({ httpOperation, mockUrl, onRequestChange, requestBodyIndex, embe
+                 setResponse({
+                     status: response.status,
+                     bodyText: type !== 'image' ? yield response.text() : undefined,
++                    // bodyText: yield response.text(),
+                     blob: type === 'image' ? yield response.blob() : undefined,
+                     contentType,
+                 });
+@@ -1729,6 +1780,7 @@ const TryIt = ({ httpOperation, mockUrl, onRequestChange, requestBodyIndex, embe
+     return (React.createElement(Box, { rounded: "lg", overflowY: "hidden" },
+         React.createElement(Panel, { isCollapsible: false, p: 0, className: "TryItPanel" },
+             React.createElement(Panel.Titlebar, { rightComponent: servers.length > 1 ? serversSelect : serverDescription, bg: "canvas-300" },
++
+                 React.createElement("div", { role: "heading", className: "sl-font-bold" },
+                     React.createElement(Text, { color: !isDark ? HttpMethodColors[httpOperation.method] : undefined }, httpOperation.method.toUpperCase()),
+                     React.createElement(Text, { ml: 2 }, httpOperation.path))),
