@@ -13,6 +13,7 @@
     "@stoplight/elements-core": "^7.3.6",
     "@stoplight/elements-dev-portal": "^1.4.3",
     "next": "11.1.2",
+    "node-fetch": "^3.1.0",
     "patch-package": "^6.4.7",
     "randomcolor": "^0.6.2",
     "react": "17.0.2",
