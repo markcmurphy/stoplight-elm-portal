@@ -4,6 +4,7 @@ import styles from '../styles/Home.module.css';
 import Link from 'next/link';
 import { StoplightProject } from '@stoplight/elements-dev-portal';
 import { useState } from 'react';
+import useSWR from 'swr';
 
 export default function Home() {
   const [tags, setTags] = useState([]);
