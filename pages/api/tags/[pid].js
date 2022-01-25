@@ -27,7 +27,7 @@ async function handler(req, res) {
 
   await fetch(
     // 'https://stoplight.io/api/v1/projects/cHJqOjg3OTYx/table-of-contents',
-    '/api/mergetags/merge',
+    '/api/mergetags/',
     // 'https://stoplight.io/api/v1/projects/cHJqOjI4MDIz/table-of-contents',
     {
       method: 'GET',

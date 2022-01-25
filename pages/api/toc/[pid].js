@@ -1,11 +1,11 @@
-const nodeResult = ({ data }) => {
-  function tagRegex(str) {
-    let arr = [];
-    let regex = /[tags]+:\s\[(?<tags>[a-z][a-z0-9_\s,]+[a-z0-9]*)\]/i;
-    return regex.test(str) ? str.match(regex).groups.tags.split(', ') : arr;
-  }
-  return tagRegex(data);
-};
+// const nodeResult = ({ data }) => {
+//   function tagRegex(str) {
+//     let arr = [];
+//     let regex = /[tags]+:\s\[(?<tags>[a-z][a-z0-9_\s,]+[a-z0-9]*)\]/i;
+//     return regex.test(str) ? str.match(regex).groups.tags.split(', ') : arr;
+//   }
+//   return tagRegex(data);
+// };
 
 export async function getNodeData(nodeId) {
   // const { pid } = req.query;
@@ -13,9 +13,6 @@ export async function getNodeData(nodeId) {
   const response = await fetch(
     // real repo
     `https://stoplight.io/api/v1/projects/cHJqOjI4MDIz/nodes/${nodeId}`,
-
-    // demo
-    // `https://stoplight.io/api/v1/projects/cHJqOjg3OTYx/nodes/${pid}`,
     {
       method: 'GET',
       redirect: 'follow',

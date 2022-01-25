@@ -2188,54 +2188,15 @@ async function mergeTags(toc) {
     }
     return obj;
   }
-  // async function printAllVals(newToc) {
-  //   for (let k in newToc) {
-  //     let tags = await getNodeData(newToc[k]);
-  //     if (typeof newToc[k] === 'object') {
-  //       await printAllVals(newToc[k]);
-  //     } else {
-  //       let newObj = {
-  //         ...newToc,
-  //         tags,
-  //       };
-
-  //       if (k == 'id') {
-  //         return Object.assign(newToc, newObj);
-  //       }
-  //     }
-  //   }
-  //   return newToc;
-  // }
 
   let resolve = copy(toc);
   let tocItemsCopy = resolve.duplicates.map(copy);
-  console.log(
-    '🚀 ~ file: [pid].js ~ line 2212 ~ mergeTags ~ tocItemsCopy',
-    tocItemsCopy
-  );
   let resItems = await printAllVals(tocItemsCopy);
-  // resItems ? (resolve.items = resItems) : null;
-  // console.log('🚀 ~ file: [pid].js ~ line 2239 ~ resItems', resItems);
   return resItems;
 }
 
-// export async function getData() {
-//   const response = await fetch(
-//     'https://stoplight.io/api/v1/projects/cHJqOjI4MDIz/table-of-contents',
-//     {
-//       method: 'GET',
-//       redirect: 'follow',
-//     }
-//   );
-
-//   let result = await response.json();
-//   let items = await mergeTags(result);
-//   return items;
-// }
-
 export default async function handler(req, res) {
   const jsonData = await mergeTags(dupes);
-  // console.log('🚀 ~ file: [pid].js ~ line 2234 ~ handler ~ jsonData', jsonData);
 
   try {
     res.send(jsonData);
